@@ -145,6 +145,7 @@ def main(_):
     processor = data.MultiLabelTextProcessor(FLAGS.data_dir)
 
     label_list = processor.get_labels()
+    num_labels = len(label_list)
 
     tokenizer = tokenization.FullTokenizer(
         vocab_file=FLAGS.vocab_file, do_lower_case=FLAGS.do_lower_case)
@@ -176,7 +177,7 @@ def main(_):
 
     model_fn = classifier.model_fn_builder(
         bert_config=bert_config,
-        num_labels=len(label_list),
+        num_labels=num_labels,
         init_checkpoint=FLAGS.init_checkpoint,
         learning_rate=FLAGS.learning_rate,
         num_train_steps=num_train_steps,
@@ -205,6 +206,7 @@ def main(_):
         train_input_fn = data.file_based_input_fn_builder(
             input_file=train_file,
             seq_length=FLAGS.max_seq_length,
+            num_labels=num_labels,
             is_training=True,
             drop_remainder=True)
         estimator.train(input_fn=train_input_fn, max_steps=num_train_steps)
@@ -243,6 +245,7 @@ def main(_):
         eval_input_fn = data.file_based_input_fn_builder(
             input_file=eval_file,
             seq_length=FLAGS.max_seq_length,
+            num_labels=num_labels,
             is_training=False,
             drop_remainder=eval_drop_remainder)
 
@@ -281,6 +284,7 @@ def main(_):
         predict_input_fn = data.file_based_input_fn_builder(
             input_file=predict_file,
             seq_length=FLAGS.max_seq_length,
+            num_labels=num_labels,
             is_training=False,
             drop_remainder=predict_drop_remainder)
 

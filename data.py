@@ -134,11 +134,11 @@ def convert_single_example(ex_index, example, label_map, max_seq_length,
             label_ids=[0] * len(label_map),
             is_real_example=False)
 
-    tokens = tokenizer.tokenize(example.text)
+    tokens_original = tokenizer.tokenize(example.text)
 
     # Account for [CLS] and [SEP] with "- 2"
-    if len(tokens) > max_seq_length - 2:
-        tokens = tokens[0:(max_seq_length - 2)]
+    if len(tokens_original) > max_seq_length - 2:
+        tokens_original = tokens_original[0:(max_seq_length - 2)]
 
     # The convention in BERT is:
     # (a) For sequence pairs:
@@ -162,7 +162,7 @@ def convert_single_example(ex_index, example, label_map, max_seq_length,
     segment_ids = []
     tokens.append("[CLS]")
     segment_ids.append(0)
-    for token in tokens:
+    for token in tokens_original:
         tokens.append(token)
         segment_ids.append(0)
     tokens.append("[SEP]")
@@ -216,7 +216,7 @@ def file_based_convert_examples_to_features(
     label_map = {label: i for i, label in enumerate(label_list)}
 
     for (ex_index, example) in enumerate(examples):
-        if ex_index % 10000 == 0:
+        if ex_index % 1000 == 0:
             tf.logging.info("Writing example %d of %d" %
                             (ex_index, len(examples)))
 
@@ -232,7 +232,7 @@ def file_based_convert_examples_to_features(
         features["input_ids"] = create_int_feature(feature.input_ids)
         features["input_mask"] = create_int_feature(feature.input_mask)
         features["segment_ids"] = create_int_feature(feature.segment_ids)
-        features["label_ids"] = create_int_feature([feature.label_ids])
+        features["label_ids"] = create_int_feature(feature.label_ids)
         features["is_real_example"] = create_int_feature(
             [int(feature.is_real_example)])
 
@@ -242,7 +242,7 @@ def file_based_convert_examples_to_features(
     writer.close()
 
 
-def file_based_input_fn_builder(input_file, seq_length, is_training,
+def file_based_input_fn_builder(input_file, seq_length, num_labels, is_training,
                                 drop_remainder):
     """Creates an `input_fn` closure to be passed to TPUEstimator."""
 
@@ -250,7 +250,7 @@ def file_based_input_fn_builder(input_file, seq_length, is_training,
         "input_ids": tf.FixedLenFeature([seq_length], tf.int64),
         "input_mask": tf.FixedLenFeature([seq_length], tf.int64),
         "segment_ids": tf.FixedLenFeature([seq_length], tf.int64),
-        "label_ids": tf.FixedLenFeature([], tf.int64),
+        "label_ids": tf.FixedLenFeature([num_labels], tf.int64),
         "is_real_example": tf.FixedLenFeature([], tf.int64),
     }
 
