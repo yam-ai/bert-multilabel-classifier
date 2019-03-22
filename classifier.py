@@ -14,11 +14,7 @@ def create_model(bert_config, is_training, input_ids, input_mask, segment_ids,
         token_type_ids=segment_ids,
         use_one_hot_embeddings=use_one_hot_embeddings)
 
-    # In the demo, we are doing a simple classification task on the entire
-    # segment.
-    #
-    # If you want to use the token-level output, use model.get_sequence_output()
-    # instead.
+    # Classification task on the entire segment.
     output_layer = model.get_pooled_output()
 
     hidden_size = output_layer.shape[-1].value
@@ -40,7 +36,7 @@ def create_model(bert_config, is_training, input_ids, input_mask, segment_ids,
         probabilities = tf.nn.sigmoid(logits)
 
         sigmoid_cross_entropy_loss = tf.nn.sigmoid_cross_entropy_with_logits(
-            labels=labels, logits=logits)
+            labels=tf.cast(labels, tf.float32), logits=logits)
         per_example_loss = tf.reduce_sum(sigmoid_cross_entropy_loss, axis=-1)
         loss = tf.reduce_mean(per_example_loss)
 
