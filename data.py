@@ -242,8 +242,8 @@ def file_based_convert_examples_to_features(
     writer.close()
 
 
-def file_based_input_fn_builder(input_file, seq_length, num_labels, is_training,
-                                drop_remainder):
+def input_fn_builder(input_file, seq_length, num_labels, is_training,
+                     drop_remainder):
     """Creates an `input_fn` closure to be passed to TPUEstimator."""
 
     name_to_features = {
@@ -254,21 +254,22 @@ def file_based_input_fn_builder(input_file, seq_length, num_labels, is_training,
         "is_real_example": tf.FixedLenFeature([], tf.int64),
     }
 
-    def _decode_record(record, name_to_features):
-        """Decodes a record to a TensorFlow example."""
-        example = tf.parse_single_example(record, name_to_features)
-
+    def _cast_features(features):
         # tf.Example only supports tf.int64, but the TPU only supports tf.int32.
         # So cast all int64 to int32.
-        for name in list(example.keys()):
-            t = example[name]
+        for name in features:
+            t = features[name]
             if t.dtype == tf.int64:
                 t = tf.cast(t, tf.int32)
-            example[name] = t
+            features[name] = t
+        return features
 
-        return example
+    def _decode_record(record, name_to_features):
+        """Decodes a record to a TensorFlow example."""
+        features = tf.parse_single_example(record, name_to_features)
+        return _cast_features(features)
 
-    def input_fn(params):
+    def file_based_input_fn(params):
         """The actual input function."""
         batch_size = params["batch_size"]
 
@@ -287,4 +288,19 @@ def file_based_input_fn_builder(input_file, seq_length, num_labels, is_training,
 
         return d
 
-    return input_fn
+    def serving_input_receiver_fn():
+        """An input_fn that expects a serialized tf.Example."""
+        serialized_tf_example = tf.placeholder(
+            dtype=tf.string,
+            name='input_example_tensor')
+        receiver_tensors = {'examples': serialized_tf_example}
+
+        features = tf.parse_example(serialized_tf_example, name_to_features)
+        features = _cast_features(features)
+
+        return tf.estimator.export.ServingInputReceiver(features, receiver_tensors)
+
+    if input_file is not None:
+        return file_based_input_fn
+    else:
+        return serving_input_receiver_fn

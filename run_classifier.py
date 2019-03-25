@@ -193,7 +193,8 @@ def main(_):
         config=run_config,
         train_batch_size=FLAGS.train_batch_size,
         eval_batch_size=FLAGS.eval_batch_size,
-        predict_batch_size=FLAGS.predict_batch_size)
+        predict_batch_size=FLAGS.predict_batch_size,
+        export_to_tpu=False)
 
     if FLAGS.do_train:
         train_file = os.path.join(FLAGS.output_dir, "train.tf_record")
@@ -203,13 +204,22 @@ def main(_):
         tf.logging.info("  Num examples = %d", len(train_examples))
         tf.logging.info("  Batch size = %d", FLAGS.train_batch_size)
         tf.logging.info("  Num steps = %d", num_train_steps)
-        train_input_fn = data.file_based_input_fn_builder(
+        train_input_fn = data.input_fn_builder(
             input_file=train_file,
             seq_length=FLAGS.max_seq_length,
             num_labels=num_labels,
             is_training=True,
             drop_remainder=True)
         estimator.train(input_fn=train_input_fn, max_steps=num_train_steps)
+
+        # Export as SavedModel
+        serving_input_fn = data.input_fn_builder(input_file=None,
+                                                 seq_length=FLAGS.max_seq_length,
+                                                 num_labels=num_labels,
+                                                 is_training=False,
+                                                 drop_remainder=False)
+        estimator.export_saved_model(FLAGS.output_dir, serving_input_fn, assets_extra={
+                                     "bert_config.json": bert_config_file, "vocab.txt": vocab_file})
 
     if FLAGS.do_eval:
         eval_examples = processor.get_dev_examples()
@@ -242,7 +252,7 @@ def main(_):
             eval_steps = int(len(eval_examples) // FLAGS.eval_batch_size)
 
         eval_drop_remainder = True if FLAGS.use_tpu else False
-        eval_input_fn = data.file_based_input_fn_builder(
+        eval_input_fn = data.input_fn_builder(
             input_file=eval_file,
             seq_length=FLAGS.max_seq_length,
             num_labels=num_labels,
@@ -281,7 +291,7 @@ def main(_):
         tf.logging.info("  Batch size = %d", FLAGS.predict_batch_size)
 
         predict_drop_remainder = True if FLAGS.use_tpu else False
-        predict_input_fn = data.file_based_input_fn_builder(
+        predict_input_fn = data.input_fn_builder(
             input_file=predict_file,
             seq_length=FLAGS.max_seq_length,
             num_labels=num_labels,
