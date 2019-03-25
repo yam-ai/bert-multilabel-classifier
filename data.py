@@ -263,7 +263,7 @@ def file_based_input_fn_builder(input_file, seq_length, num_labels, is_training,
         for name in list(example.keys()):
             t = example[name]
             if t.dtype == tf.int64:
-                t = tf.to_int32(t)
+                t = tf.cast(t, tf.int32)
             example[name] = t
 
         return example
