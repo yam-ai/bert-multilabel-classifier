@@ -219,7 +219,7 @@ def main(_):
                                                  is_training=False,
                                                  drop_remainder=False)
         estimator.export_saved_model(FLAGS.output_dir, serving_input_fn, assets_extra={
-                                     "bert_config.json": bert_config_file, "vocab.txt": vocab_file})
+                                     "bert_config.json": FLAGS.bert_config_file, "vocab.txt": FLAGS.vocab_file})
 
     if FLAGS.do_eval:
         eval_examples = processor.get_dev_examples()
