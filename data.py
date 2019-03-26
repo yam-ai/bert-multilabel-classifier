@@ -95,7 +95,7 @@ class MultiLabelTextProcessor(DataProcessor):
 
     def _create_examples(self, lines):
         """Creates examples for the training and dev sets."""
-        examples = []
+        examples = list()
         for (i, line) in enumerate(lines):
             if i == 0:
                 continue
@@ -122,7 +122,7 @@ class InputFeatures(object):
         self.is_real_example = is_real_example
 
 
-def convert_single_example(ex_index, example, label_map, max_seq_length,
+def convert_single_example(ex_index, example, num_labels, max_seq_length,
                            tokenizer):
     """Converts a single `InputExample` into a single `InputFeatures`."""
 
@@ -131,7 +131,7 @@ def convert_single_example(ex_index, example, label_map, max_seq_length,
             input_ids=[0] * max_seq_length,
             input_mask=[0] * max_seq_length,
             segment_ids=[0] * max_seq_length,
-            label_ids=[0] * len(label_map),
+            label_ids=[0] * num_labels,
             is_real_example=False)
 
     tokens_original = tokenizer.tokenize(example.text)
@@ -208,19 +208,15 @@ def convert_single_example(ex_index, example, label_map, max_seq_length,
     return feature
 
 
-def file_based_convert_examples_to_features(
-        examples, label_list, max_seq_length, tokenizer, output_file):
-    """Convert a set of `InputExample`s to a TFRecord file."""
+def convert_examples_to_features(examples, num_labels, max_seq_length, tokenizer):
 
-    writer = tf.python_io.TFRecordWriter(output_file)
-    label_map = {label: i for i, label in enumerate(label_list)}
-
+    example_string_list = list()
     for (ex_index, example) in enumerate(examples):
         if ex_index % 1000 == 0:
             tf.logging.info("Writing example %d of %d" %
                             (ex_index, len(examples)))
 
-        feature = convert_single_example(ex_index, example, label_map,
+        feature = convert_single_example(ex_index, example, num_labels,
                                          max_seq_length, tokenizer)
 
         def create_int_feature(values):
@@ -238,7 +234,21 @@ def file_based_convert_examples_to_features(
 
         tf_example = tf.train.Example(
             features=tf.train.Features(feature=features))
-        writer.write(tf_example.SerializeToString())
+
+        example_string_list.append(tf_example.SerializeToString())
+
+    return example_string_list
+
+
+def file_based_convert_examples_to_features(
+        examples, num_labels, max_seq_length, tokenizer, output_file):
+    """Convert a set of `InputExample`s to a TFRecord file."""
+
+    writer = tf.python_io.TFRecordWriter(output_file)
+    example_string_list = convert_examples_to_features(
+        examples, num_labels, max_seq_length, tokenizer)
+    for example_string in example_string_list:
+        writer.write(example_string)
     writer.close()
 
 
