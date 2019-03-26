@@ -184,7 +184,10 @@ def convert_single_example(ex_index, example, num_labels, max_seq_length,
     assert len(input_mask) == max_seq_length
     assert len(segment_ids) == max_seq_length
 
-    label_ids = [int(x) for x in example.labels]
+    if example.labels is not None:
+        label_ids = [int(x) for x in example.labels]
+    else:
+        label_ids = [0] * num_labels
     if ex_index < 5:
         tf.logging.info("*** Example ***")
         tf.logging.info("guid: %s" % (example.guid))
@@ -210,6 +213,10 @@ def convert_single_example(ex_index, example, num_labels, max_seq_length,
 
 def convert_examples_to_features(examples, num_labels, max_seq_length, tokenizer):
 
+    def create_int_feature(values):
+        f = tf.train.Feature(int64_list=tf.train.Int64List(value=values))
+        return f
+
     example_string_list = list()
     for (ex_index, example) in enumerate(examples):
         if ex_index % 1000 == 0:
@@ -218,11 +225,6 @@ def convert_examples_to_features(examples, num_labels, max_seq_length, tokenizer
 
         feature = convert_single_example(ex_index, example, num_labels,
                                          max_seq_length, tokenizer)
-
-        def create_int_feature(values):
-            f = tf.train.Feature(
-                int64_list=tf.train.Int64List(value=list(values)))
-            return f
 
         features = collections.OrderedDict()
         features["input_ids"] = create_int_feature(feature.input_ids)
