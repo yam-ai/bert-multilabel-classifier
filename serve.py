@@ -17,7 +17,7 @@ class MultiLabelClassifierServer(object):
             saved_model_dir, "assets.extra", "vocab.txt")
         self.classifier_config_file = os.path.join(
             saved_model_dir, "assets.extra", "classifier_config.json")
-        with open(classifier_config_file) as f:
+        with open(self.classifier_config_file) as f:
             self.classifier_config = json.load(f)
         self.do_lower_case = classifier_config.get("do_lower_case")
         self.max_seq_length = classifier_config.get("max_seq_length")
