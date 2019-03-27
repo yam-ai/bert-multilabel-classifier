@@ -19,13 +19,13 @@ class MultiLabelClassifierServer(object):
             saved_model_dir, "assets.extra", "classifier_config.json")
         with open(self.classifier_config_file) as f:
             self.classifier_config = json.load(f)
-        self.do_lower_case = classifier_config.get("do_lower_case")
-        self.max_seq_length = classifier_config.get("max_seq_length")
-        self.labels = classifier_config.get("labels")
-        self.num_labels = len(labels)
+        self.do_lower_case = self.classifier_config.get("do_lower_case")
+        self.max_seq_length = self.classifier_config.get("max_seq_length")
+        self.labels = self.classifier_config.get("labels")
+        self.num_labels = len(self.labels)
 
         self.tokenizer = tokenization.FullTokenizer(
-            vocab_file=vocab_file, do_lower_case=self.do_lower_case)
+            vocab_file=self.vocab_file, do_lower_case=self.do_lower_case)
         self.predictor = tf.contrib.predictor.from_saved_model(
             export_dir=saved_model_dir, config=config)
 
