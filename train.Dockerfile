@@ -7,4 +7,4 @@ ENV BERT_DIR=/bert
 ENV DATA_DIR=/data
 ENV OUTPUT_DIR=/output
 
-CMD ["/source/script.sh"]
+CMD ["/source/train.sh"]
