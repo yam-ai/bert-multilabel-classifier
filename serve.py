@@ -43,7 +43,8 @@ class MultiLabelClassifierServer(object):
         tf.logging.info("  Num examples = {}".format(len(example_string_list)))
 
         predictions = self.predictor({"examples": example_string_list})
+        probabilities = predictions.get("probabilities")
         toc = time.time()
         tf.logging.info("Prediction time: {}s".format((toc - tic)))
 
-        return predictions
+        return probabilities.tolist()
