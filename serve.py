@@ -29,11 +29,13 @@ class MultiLabelClassifierServer(object):
         self.predictor = tf.contrib.predictor.from_saved_model(
             export_dir=saved_model_dir, config=config)
 
-    def predict(self, query):
+    def predict(self, texts):
         examples = list()
-        for i, text in enumerate(query):
+        for item in texts:
+            id = item.get("id")
+            text = item.get("text")
             text = tokenization.convert_to_unicode(text)
-            examples.append(data.InputExample(guid=i, text=text))
+            examples.append(data.InputExample(guid=id, text=text))
 
         example_string_list = data.convert_examples_to_features(
             examples, self.num_labels, self.max_seq_length, self.tokenizer)
@@ -43,8 +45,10 @@ class MultiLabelClassifierServer(object):
         tf.logging.info("  Num examples = {}".format(len(example_string_list)))
 
         predictions = self.predictor({"examples": example_string_list})
-        probabilities = predictions.get("probabilities")
+        scores = predictions.get("probabilities").tolist()
         toc = time.time()
         tf.logging.info("Prediction time: {}s".format((toc - tic)))
 
-        return probabilities.tolist()
+        for i, item in enumerate(texts):
+            item["scores"] = scores[i]
+        return texts

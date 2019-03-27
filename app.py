@@ -10,9 +10,10 @@ class ClassifierResource:
 
     def on_post(self, req, resp):
         """Handles POST requests"""
-        answers = self.classifier.predict(req.media)
+        texts = req.media.get("texts")
+        result = self.classifier.predict(texts)
 
-        resp.media = answers
+        resp.media = result
 
 
 def create_app(model_dir):
