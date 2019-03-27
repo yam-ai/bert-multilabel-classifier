@@ -19,6 +19,7 @@ from __future__ import division
 from __future__ import print_function
 
 import os
+import json
 import modeling
 import tokenization
 import tensorflow as tf
@@ -213,13 +214,25 @@ def main(_):
         estimator.train(input_fn=train_input_fn, max_steps=num_train_steps)
 
         # Export as SavedModel
+        classifier_config = {
+            "max_seq_length": FLAGS.max_seq_length,
+            "do_lower_case": FLAGS.do_lower_case,
+            "labels": label_list
+        }
+        classifier_config_file = os.path.join(
+            FLAGS.output_dir, "classifier_config.json")
+        with tf.gfile.GFile(classifier_config_file, "w") as writer:
+            writer.write(json.dumps(classifier_config))
+
         serving_input_fn = data.input_fn_builder(input_file=None,
                                                  seq_length=FLAGS.max_seq_length,
                                                  num_labels=num_labels,
                                                  is_training=False,
                                                  drop_remainder=False)
-        estimator.export_saved_model(FLAGS.output_dir, serving_input_fn, assets_extra={
-                                     "bert_config.json": FLAGS.bert_config_file, "vocab.txt": FLAGS.vocab_file})
+        estimator.export_saved_model(FLAGS.output_dir, serving_input_fn,
+                                     assets_extra={"bert_config.json": FLAGS.bert_config_file,
+                                                   "vocab.txt": FLAGS.vocab_file,
+                                                   "classifier_config.json": classifier_config_file})
 
     if FLAGS.do_eval:
         eval_examples = processor.get_dev_examples()
