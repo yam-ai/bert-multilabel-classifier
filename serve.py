@@ -50,5 +50,5 @@ class MultiLabelClassifierServer(object):
         tf.logging.info("Prediction time: {}s".format((toc - tic)))
 
         for i, item in enumerate(texts):
-            item["scores"] = scores[i]
+            item["scores"] = dict(zip(self.labels, scores[i]))
         return texts
