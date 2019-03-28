@@ -32,9 +32,14 @@ FLAGS = flags.FLAGS
 
 # Required parameters
 flags.DEFINE_string(
-    "data_dir", None,
-    "The input data dir. Should contain the .tsv files (or other data files) "
-    "for the task.")
+    "data_sqlite", None,
+    "The input data in sqlite file. "
+    "Should contain the texts and labels for the task.")
+
+flags.DEFINE_string(
+    "train_eval_test_ratio", "7,3,0",
+    "The ratio of samples for training, evaluation and testing"
+)
 
 flags.DEFINE_string(
     "bert_config_file", None,
@@ -143,10 +148,8 @@ def main(_):
 
     tf.gfile.MakeDirs(FLAGS.output_dir)
 
-    processor = data.MultiLabelTextProcessor(FLAGS.data_dir)
-
-    label_list = processor.get_labels()
-    num_labels = len(label_list)
+    processor = data.MultiLabelTextSqliteProcessor(FLAGS.data_sqlite)
+    label_list, num_labels = processor.get_labels()
 
     tokenizer = tokenization.FullTokenizer(
         vocab_file=FLAGS.vocab_file, do_lower_case=FLAGS.do_lower_case)
@@ -170,8 +173,13 @@ def main(_):
     train_examples = None
     num_train_steps = None
     num_warmup_steps = None
+
+    train_eval_test_ratio = [float(x)
+                             for x in FLAGS.train_eval_test_ratio.split(",")]
+    train_examples, eval_examples, predict_examples = processor.get_examples(
+        train_eval_test_ratio)
+
     if FLAGS.do_train:
-        train_examples = processor.get_train_examples()
         num_train_steps = int(
             len(train_examples) / FLAGS.train_batch_size * FLAGS.num_train_epochs)
         num_warmup_steps = int(num_train_steps * FLAGS.warmup_proportion)
@@ -235,7 +243,6 @@ def main(_):
                                                    "classifier_config.json": classifier_config_file})
 
     if FLAGS.do_eval:
-        eval_examples = processor.get_dev_examples()
         num_actual_eval_examples = len(eval_examples)
         if FLAGS.use_tpu:
             # TPU requires a fixed batch size for all batches, therefore the number
@@ -282,7 +289,6 @@ def main(_):
                 writer.write("%s = %s\n" % (key, str(result[key])))
 
     if FLAGS.do_predict:
-        predict_examples = processor.get_test_examples()
         num_actual_predict_examples = len(predict_examples)
         if FLAGS.use_tpu:
             # TPU requires a fixed batch size for all batches, therefore the number
@@ -331,7 +337,7 @@ def main(_):
 
 
 if __name__ == "__main__":
-    flags.mark_flag_as_required("data_dir")
+    flags.mark_flag_as_required("data_sqlite")
     flags.mark_flag_as_required("vocab_file")
     flags.mark_flag_as_required("bert_config_file")
     flags.mark_flag_as_required("output_dir")

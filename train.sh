@@ -3,7 +3,8 @@
 python run_classifier.py \
 --do_train=true \
 --do_eval=true \
---data_dir=$DATA_DIR \
+--data_sqlite=$DATA_SQLITE \
+--train_eval_test_ratio=7,3,0 \
 --vocab_file=$BERT_DIR/vocab.txt \
 --bert_config_file=$BERT_DIR/bert_config.json \
 --init_checkpoint=$BERT_DIR/bert_model.ckpt \
