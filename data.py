@@ -1,4 +1,5 @@
 import os
+import sqlite3
 import csv
 import collections
 import tokenization
@@ -104,6 +105,61 @@ class MultiLabelTextProcessor(DataProcessor):
             labels = line[2:]
             examples.append(InputExample(guid=guid, text=text, labels=labels))
         return examples
+
+
+class MultiLabelTextSqliteProcessor(object):
+    # schema = '''
+    #     CREATE TABLE IF NOT EXISTS texts (
+    #         id TEXT NOT NULL PRIMARY KEY,
+    #         text TEXT NOT NULL
+    #     );
+    #     CREATE TABLE IF NOT EXISTS labels (
+    #         label TEXT NOT NULL,
+    #         text_id text NOT NULL,
+    #         FOREIGN KEY (text_id) REFERENCES texts(id)
+    #     );
+    # '''
+
+    def __init__(self, sqlite_file):
+        self.sqlite_file = sqlite_file
+
+    def get_labels(self):
+        conn = sqlite3.connect(self.sqlite_file)
+        cursor = conn.cursor()
+        cursor.execute("SELECT DISTINCT label FROM labels")
+
+        self.labels = list()
+        for row in cursor.fetchall():
+            label, = row
+            self.labels.append(label)
+        conn.close()
+
+        self.num_labels = len(self.labels)
+        return self.labels, self.num_labels
+
+    def get_examples(self, train_eval_test_ratio):
+        assert len(train_eval_test_ratio) == 3
+        assert all([x >= 0 for x in train_eval_test_ratio])
+
+        conn = sqlite3.connect(self.sqlite_file)
+        cursor = conn.cursor()
+        cursor.execute(
+            "SELECT id, text, GROUP_CONCAT(label) FROM texts, labels ON texts.id = labels.text_id GROUP BY texts.id")
+
+        examples = list()
+        for row in cursor.fetchall():
+            guid, text, labels_concat = row
+            examples.append(InputExample(guid=guid, text=text,
+                                         labels=labels_concat.split(",")))
+        conn.close()
+
+        num_examples = len(examples)
+        ratio_sum = sum(train_eval_test_ratio)
+        train_idx = int(num_examples * train_eval_test_ratio[0] / ratio_sum)
+        eval_idx = int(
+            num_examples * (train_eval_test_ratio[0] + train_eval_test_ratio[1]) / ratio_sum)
+
+        return examples[:train_idx], examples[train_idx:eval_idx], examples[eval_idx:]
 
 
 class InputFeatures(object):
