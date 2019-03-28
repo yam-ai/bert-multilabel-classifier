@@ -159,6 +159,9 @@ class MultiLabelTextSqliteProcessor(object):
         eval_idx = int(
             num_examples * (train_eval_test_ratio[0] + train_eval_test_ratio[1]) / ratio_sum)
 
+        # Shuffle the examples
+        random.shuffle(examples)
+
         return examples[:train_idx], examples[train_idx:eval_idx], examples[eval_idx:]
 
 
