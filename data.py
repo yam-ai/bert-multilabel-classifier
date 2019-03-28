@@ -135,6 +135,8 @@ class MultiLabelTextSqliteProcessor(object):
         conn.close()
 
         self.num_labels = len(self.labels)
+        self.label_to_idx = {x: i for i, x in enumerate(self.labels)}
+
         return self.labels, self.num_labels
 
     def get_examples(self, train_eval_test_ratio):
@@ -149,8 +151,12 @@ class MultiLabelTextSqliteProcessor(object):
         examples = list()
         for row in cursor.fetchall():
             guid, text, labels_concat = row
+            onehot_labels = [0] * self.num_labels
+            for x in labels_concat.split(","):
+                idx = self.label_to_idx[x]
+                onehot_labels[idx] = 1
             examples.append(InputExample(guid=guid, text=text,
-                                         labels=labels_concat.split(",")))
+                                         labels=onehot_labels))
         conn.close()
 
         num_examples = len(examples)
