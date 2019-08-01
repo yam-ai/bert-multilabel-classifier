@@ -8,31 +8,34 @@ This repository is adapted from [**BERT**](https://github.com/google-research/be
 ## Usage
 
 
-1. Prepare the dataset as a sqlite database  
+### 1. Prepare the dataset as a sqlite database  
 The training data is expected to be given as a sqlite database. It consists of two tables, `texts` and `labels`, storing the texts and their associated labels.  
 Let us take the [toxic comment dataset](https://www.kaggle.com/c/jigsaw-toxic-comment-classification-challenge/data) as an example. The file `train.csv` has the following columns: `"id"`, `"comment_text"`, `"toxic"`, `"severe_toxic"`, `"obscene"`, `"threat"`, `"insult"`, `"identity_hate"`. The last six columns represent the labels of the `comment_text`. 
 The python script in `example\csv2sqlite.py` can process `train.csv` and save the data in a sqlite file. 
 
 
-2. Download pretrained models  
+### 2. Download pretrained models  
 Download and extract pretrained models from [**BERT**](https://github.com/google-research/bert), such as the [BERT-Base, Multilingual Cased](https://storage.googleapis.com/bert_models/2018_11_23/multi_cased_L-12_H-768_A-12.zip) model.
 
-3. Modify parameters in `train.sh`  
+
+### 3. Modify parameters in `train.sh`  
 The training parameters such as `train_batch_size`, `learning_rate`, `num_train_epochs`, `max_seq_length` can be modified here.
 
-4. Train  
+
+### 4. Train  
 Build the docker image for training  
 ```sh
 docker build -f train.Dockerfile -t classifier-train .
-```
+```  
 Assume the paths of the pretrained model, the sqlite file and the desired output model directory are `$BERT_DIR`, `$DATA_SQLITE` and `$OUTPUT_DIR` respectively. Run the training container by mounting the above volumes:
 ```sh
 docker run -v $BERT_DIR:/bert -v $DATA_SQLITE:/data.db -v $OUTPUT_DIR:/output classifier-train
 ```
 
-At the end of training, `$OUTPUT_DIR` should contain a bunch of files, including a directory with number (a timestamp) as its name. For example, it has the form `$OUTPUT_DIR/1564483298/`. The is the output directory used for serving.
+At the end of training, `$OUTPUT_DIR` should contain a bunch of files, including a directory with number (a timestamp) as its name. For example, it has the form `$OUTPUT_DIR/1564483298/`. This is the output directory used for serving.
 
-5. Serve  
+
+### 5. Serve  
 Build the docker image for serving  
 ```sh
 docker build -f serve.Dockerfile -t classifier-serve .
@@ -43,7 +46,8 @@ Run the serving container by mounting the output directory above and expose a po
 docker run -v $OUTPUT_DIR/1564483298/:/model -p 8000:8000 classifier-serve
 ```
 
-6. Make a post call to `http://localhost:8000/classifier` with a JSON body:
+
+### 6. Make a post call to `http://localhost:8000/classifier` with a JSON body:
 ```json
 {
     "texts": [
@@ -72,4 +76,6 @@ Then in reply we should get back a list of scores, indicating the likelihood of 
 ]
 ```
 
-7. If GPU is available, acceleration of training and serving can be acheived by running `nvidia-docker`. The base image in `train.Dockerfile` and `serve.Dockerfile` should also be changed to the GPU version.
+
+### 7. GPU
+If GPU is available, acceleration of training and serving can be acheived by running `nvidia-docker`. The base image in `train.Dockerfile` and `serve.Dockerfile` should also be changed to the GPU version.
