@@ -9,9 +9,22 @@ This repository is adapted from [**BERT**](https://github.com/google-research/be
 
 
 ### 1. Prepare the dataset as a sqlite database  
-The training data is expected to be given as a sqlite database. It consists of two tables, `texts` and `labels`, storing the texts and their associated labels.  
+The training data is expected to be given as a sqlite database. It consists of two tables, `texts` and `labels`, storing the texts and their associated labels:
+```SQL
+CREATE TABLE IF NOT EXISTS texts (
+    id TEXT NOT NULL PRIMARY KEY,
+    text TEXT NOT NULL
+);
+CREATE TABLE IF NOT EXISTS labels (
+    label TEXT NOT NULL,
+    text_id text NOT NULL,
+    FOREIGN KEY (text_id) REFERENCES texts(id)
+);
+```
+An empty example sqlite file is in `example/data.db`.
+
 Let us take the [toxic comment dataset](https://www.kaggle.com/c/jigsaw-toxic-comment-classification-challenge/data) as an example. The file `train.csv` has the following columns: `"id"`, `"comment_text"`, `"toxic"`, `"severe_toxic"`, `"obscene"`, `"threat"`, `"insult"`, `"identity_hate"`. The last six columns represent the labels of the `comment_text`. 
-The python script in `example\csv2sqlite.py` can process `train.csv` and save the data in a sqlite file. 
+The python script in `example/csv2sqlite.py` can process `train.csv` and save the data in a sqlite file. 
 
 
 ### 2. Download pretrained models  
