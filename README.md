@@ -24,19 +24,19 @@ CREATE TABLE IF NOT EXISTS labels (
 );
 CREATE INDEX label_index ON labels (label);
 ```
-An empty example sqlite file is in `example/data.db`.
+An empty example sqlite file is in [`example/data.db`](https://github.com/yam-ai/bert-multilabel-classifier/blob/master/example/data.db).
 
 Let us take the [toxic comment dataset](https://www.kaggle.com/c/jigsaw-toxic-comment-classification-challenge/data) as an example. The data file `train.csv` in this dataset (not included in this repository) has the following columns: `"id"`, `"comment_text"`, `"toxic"`, `"severe_toxic"`, `"obscene"`, `"threat"`, `"insult"`, `"identity_hate"`. The last six columns represent the labels of the `comment_text`.
 
-The python script in `example/csv2sqlite.py` can process `train.csv` and save the data in a sqlite file.
+The python script in [`example/csv2sqlite.py`](https://github.com/yam-ai/bert-multilabel-classifier/blob/master/example/csv2sqlite.py) can process `train.csv` and save the data in a sqlite file.
 
 
 ### 2. Download pretrained models  
 Download and extract pretrained models from [BERT](https://github.com/google-research/bert), such as the [BERT-Base, Multilingual Cased](https://storage.googleapis.com/bert_models/2018_11_23/multi_cased_L-12_H-768_A-12.zip) model.
 
 
-### 3. Modify parameters in `train.sh`  
-The training parameters such as `train_batch_size`, `learning_rate`, `num_train_epochs`, `max_seq_length` can be modified in `train.sh`.
+### 3. Modify hyperparameters in `train.sh`  
+The training hyperparameters such as `train_batch_size`, `learning_rate`, `num_train_epochs`, `max_seq_length` can be modified in `train.sh`(https://github.com/yam-ai/bert-multilabel-classifier/blob/master/train.sh).
 
 
 ### 4. Train  
@@ -64,7 +64,9 @@ docker run -v $OUTPUT_DIR/1564483298/:/model -p 8000:8000 classifier-serve
 ```
 
 
-### 6. Make a post call to `http://localhost:8000/classifier` with a JSON body:
+### 6. Post an inference request
+
+Make an HTTP POST request to `http://localhost:8000/classifier` with a JSON body like the following:
 ```json
 {
     "texts": [
@@ -95,4 +97,4 @@ Then in reply we should get back a list of scores, indicating the likelihood of 
 
 
 ### 7. GPU
-If GPU is available, acceleration of training and serving can be acheived by running `nvidia-docker`. The base image in `train.Dockerfile` and `serve.Dockerfile` should also be changed to the GPU version.
+If GPU is available, acceleration of training and serving can be acheived by running [`nvidia-docker`](https://github.com/NVIDIA/nvidia-docker). The base image in [`train.Dockerfile`](https://github.com/yam-ai/bert-multilabel-classifier/blob/master/train.Dockerfile) and [`serve.Dockerfile`](https://github.com/yam-ai/bert-multilabel-classifier/blob/master/serve.Dockerfile) should also be changed to the GPU version.
