@@ -1,15 +1,17 @@
 # Multilabel Classification with BERT
 
-[**BERT**](https://github.com/google-research/bert) is a model from Google for Natural Language Processing (NLP). Some pretrained models are released by Google and can be further trained to more fine-tuned models for downstream tasks.
+*Bidirectional Encoder Representations from Transformers (BERT)* is a recent Natural Language Processing (NLP) technique proposed by the paper [BERT: Pre-training of Deep Bidirectional Transformers for Language Understanding](https://arxiv.org/abs/1810.04805). As the paper describes:
+> Unlike recent language representation models, BERT is designed to pre-train deep bidirectional representations from unlabeled text by jointly conditioning on both left and right context in all layers. As a result, the pre-trained BERT model can be fine-tuned with just one additional output layer to create state-of-the-art models for a wide range of tasks, such as question answering and language inference, without substantial task-specific architecture modifications.
 
-This repository is adapted from [**BERT**](https://github.com/google-research/bert) to perform a specific task: multilabel classification on texts. The training and inference procedures are packaged in containers and can be called separately.
+Serveral [**BERT** pretrained models](https://github.com/google-research/bert) have been opensourced by Google and can be further trained to more fine-tuned models for downstream tasks.
 
+This project adapts [**BERT**](https://github.com/google-research/bert) to perform a specific task: multilabel classification on texts. The training and inference procedures are packaged in containers and can be called separately.
 
 ## Usage
 
 
 ### 1. Prepare the dataset as a sqlite database  
-The training data is expected to be given as a sqlite database. It consists of two tables, `texts` and `labels`, storing the texts and their associated labels:
+The training data is expected to be given as a [sqlite](https://www.sqlite.org/index.html) database. It consists of two tables, `texts` and `labels`, storing the texts and their associated labels:
 ```SQL
 CREATE TABLE IF NOT EXISTS texts (
     id TEXT NOT NULL PRIMARY KEY,
@@ -23,8 +25,9 @@ CREATE TABLE IF NOT EXISTS labels (
 ```
 An empty example sqlite file is in `example/data.db`.
 
-Let us take the [toxic comment dataset](https://www.kaggle.com/c/jigsaw-toxic-comment-classification-challenge/data) as an example. The file `train.csv` has the following columns: `"id"`, `"comment_text"`, `"toxic"`, `"severe_toxic"`, `"obscene"`, `"threat"`, `"insult"`, `"identity_hate"`. The last six columns represent the labels of the `comment_text`. 
-The python script in `example/csv2sqlite.py` can process `train.csv` and save the data in a sqlite file. 
+Let us take the [toxic comment dataset](https://www.kaggle.com/c/jigsaw-toxic-comment-classification-challenge/data) as an example. The data file `train.csv` in this dataset (not included in this repository) has the following columns: `"id"`, `"comment_text"`, `"toxic"`, `"severe_toxic"`, `"obscene"`, `"threat"`, `"insult"`, `"identity_hate"`. The last six columns represent the labels of the `comment_text`.
+
+The python script in `example/csv2sqlite.py` can process `train.csv` and save the data in a sqlite file.
 
 
 ### 2. Download pretrained models  
@@ -32,7 +35,7 @@ Download and extract pretrained models from [**BERT**](https://github.com/google
 
 
 ### 3. Modify parameters in `train.sh`  
-The training parameters such as `train_batch_size`, `learning_rate`, `num_train_epochs`, `max_seq_length` can be modified here.
+The training parameters such as `train_batch_size`, `learning_rate`, `num_train_epochs`, `max_seq_length` can be modified in `train.sh`.
 
 
 ### 4. Train  
