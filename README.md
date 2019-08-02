@@ -22,6 +22,7 @@ CREATE TABLE IF NOT EXISTS labels (
     text_id text NOT NULL,
     FOREIGN KEY (text_id) REFERENCES texts(id)
 );
+CREATE INDEX label_index ON labels (label);
 ```
 An empty example sqlite file is in `example/data.db`.
 
