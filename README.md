@@ -3,9 +3,9 @@
 *Bidirectional Encoder Representations from Transformers (BERT)* is a recent Natural Language Processing (NLP) technique proposed by the paper [BERT: Pre-training of Deep Bidirectional Transformers for Language Understanding](https://arxiv.org/abs/1810.04805). As the paper describes:
 > Unlike recent language representation models, BERT is designed to pre-train deep bidirectional representations from unlabeled text by jointly conditioning on both left and right context in all layers. As a result, the pre-trained BERT model can be fine-tuned with just one additional output layer to create state-of-the-art models for a wide range of tasks, such as question answering and language inference, without substantial task-specific architecture modifications.
 
-Serveral [**BERT** pretrained models](https://github.com/google-research/bert) have been opensourced by Google and can be further trained to more fine-tuned models for downstream tasks.
+Serveral [BERT] (https://github.com/google-research/bert) pretrained models have been opensourced by Google and can be further trained to more fine-tuned models for downstream tasks.
 
-This project adapts [**BERT**](https://github.com/google-research/bert) to perform a specific task: multilabel classification on texts. The training and inference procedures are packaged in containers and can be called separately.
+This project adapts [BERT](https://github.com/google-research/bert) to perform a specific task: multilabel classification on texts. The training and inference procedures are packaged in containers and can be called separately.
 
 ## Usage
 
