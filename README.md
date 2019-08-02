@@ -22,7 +22,7 @@ CREATE TABLE IF NOT EXISTS labels (
     text_id text NOT NULL,
     FOREIGN KEY (text_id) REFERENCES texts(id)
 );
-CREATE INDEX label_index ON labels (label);
+CREATE INDEX IF NOT EXISTS label_index ON labels (label);
 ```
 An empty example sqlite file is in [`example/data.db`](https://github.com/yam-ai/bert-multilabel-classifier/blob/master/example/data.db).
 
@@ -30,13 +30,18 @@ Let us take the [toxic comment dataset](https://www.kaggle.com/c/jigsaw-toxic-co
 
 The python script in [`example/csv2sqlite.py`](https://github.com/yam-ai/bert-multilabel-classifier/blob/master/example/csv2sqlite.py) can process `train.csv` and save the data in a sqlite file.
 
+To convert `train.csv` to `data.db`, run the following commands:
+```sh
+$ mv /some/path/train.csv example/
+$ python3 csv2sqlite.py
+```
 
-### 2. Download pretrained models  
+### 2. Download pretrained models
 Download and extract pretrained models from [BERT](https://github.com/google-research/bert), such as the [BERT-Base, Multilingual Cased](https://storage.googleapis.com/bert_models/2018_11_23/multi_cased_L-12_H-768_A-12.zip) model.
 
 
-### 3. Modify hyperparameters in `train.sh`  
-The training hyperparameters such as `train_batch_size`, `learning_rate`, `num_train_epochs`, `max_seq_length` can be modified in `train.sh`(https://github.com/yam-ai/bert-multilabel-classifier/blob/master/train.sh).
+### 3. Tune hyperparameters
+The training hyperparameters such as `train_batch_size`, `learning_rate`, `num_train_epochs`, `max_seq_length` can be modified in [`train.sh`](https://github.com/yam-ai/bert-multilabel-classifier/blob/master/train.sh).
 
 
 ### 4. Train  
@@ -44,12 +49,15 @@ Build the docker image for training
 ```sh
 docker build -f train.Dockerfile -t classifier-train .
 ```  
-Assume the paths of the pretrained model, the sqlite file and the desired output model directory are `$BERT_DIR`, `$DATA_SQLITE` and `$OUTPUT_DIR` respectively. Run the training container by mounting the above volumes:
+
+Run the training container by mounting the above volumes:
 ```sh
 docker run -v $BERT_DIR:/bert -v $DATA_SQLITE:/data.db -v $OUTPUT_DIR:/output classifier-train
 ```
 
-At the end of training, `$OUTPUT_DIR` should contain a bunch of files, including a directory with number (a timestamp) as its name. For example, it has the form `$OUTPUT_DIR/1564483298/`. This is the output directory used for serving.
+* `$BERT_DIR` stores the full path where the downloaded BERT pretrained model is unzipped to, e.g., `/downloads/multi_cased_L-12_H-768_A-12`.
+* `$DATA_SQLITE` stores the full path to the loaded sqlite database, e.g. `/repos/bert-multilabel-classifier/example/data.db`.
+* `$OUTPUT_DIR` is the full path of the output directory, e.g., `/repos/bert-multilabel-classifier/example/output/`. After training, it will contain a bunch of files, including a directory with number (a timestamp) as its name. For example, it is in the form `$OUTPUT_DIR/1564483298/`. This is the directory of the trained model to be used for serving.
 
 
 ### 5. Serve  
