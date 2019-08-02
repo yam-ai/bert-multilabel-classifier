@@ -1,11 +1,11 @@
 # Multilabel Classification with BERT
 
-*Bidirectional Encoder Representations from Transformers (BERT)* is a recent Natural Language Processing (NLP) technique proposed by the paper [BERT: Pre-training of Deep Bidirectional Transformers for Language Understanding](https://arxiv.org/abs/1810.04805). As the paper describes:
+Bidirectional Encoder Representations from Transformers (BERT) is a recent Natural Language Processing (NLP) technique proposed by the paper [BERT: Pre-training of Deep Bidirectional Transformers for Language Understanding](https://arxiv.org/abs/1810.04805). As the paper describes:
 > Unlike recent language representation models, BERT is designed to pre-train deep bidirectional representations from unlabeled text by jointly conditioning on both left and right context in all layers. As a result, the pre-trained BERT model can be fine-tuned with just one additional output layer to create state-of-the-art models for a wide range of tasks, such as question answering and language inference, without substantial task-specific architecture modifications.
 
-Serveral [BERT] (https://github.com/google-research/bert) pretrained models have been opensourced by Google and can be further trained to more fine-tuned models for downstream tasks.
+Serveral BERT pretrained models have been opensourced by Google as the [*BERT*] (https://github.com/google-research/bert) project and can be further trained to more fine-tuned models for downstream tasks.
 
-This project adapts [BERT](https://github.com/google-research/bert) to perform a specific task: multilabel classification on texts. The training and inference procedures are packaged in containers and can be called separately.
+This project adapts [*BERT*](https://github.com/google-research/bert) to perform a specific task: multilabel classification on texts. The training and inference procedures are packaged in containers and can be called separately.
 
 ## Usage
 
@@ -31,7 +31,7 @@ The python script in `example/csv2sqlite.py` can process `train.csv` and save th
 
 
 ### 2. Download pretrained models  
-Download and extract pretrained models from [**BERT**](https://github.com/google-research/bert), such as the [BERT-Base, Multilingual Cased](https://storage.googleapis.com/bert_models/2018_11_23/multi_cased_L-12_H-768_A-12.zip) model.
+Download and extract pretrained models from [*BERT*](https://github.com/google-research/bert), such as the [BERT-Base, Multilingual Cased](https://storage.googleapis.com/bert_models/2018_11_23/multi_cased_L-12_H-768_A-12.zip) model.
 
 
 ### 3. Modify parameters in `train.sh`  
