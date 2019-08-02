@@ -29,7 +29,7 @@ schema = '''
             FOREIGN KEY (text_id) REFERENCES texts(id)
         );
     '''
-conn = sqlite3.connect('labeled_text.db')
+conn = sqlite3.connect('data.db')
 cur = conn.cursor()
 cur.executescript(schema)
 
