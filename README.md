@@ -26,7 +26,7 @@ CREATE INDEX IF NOT EXISTS label_index ON labels (label);
 ```
 An empty example sqlite file is in [`example/data.db`](https://github.com/yam-ai/bert-multilabel-classifier/blob/master/example/data.db).
 
-Let us take the [toxic comment dataset](https://www.kaggle.com/c/jigsaw-toxic-comment-classification-challenge/data) as an example. The data file `train.csv` in this dataset (not included in this repository) has the following columns: `"id"`, `"comment_text"`, `"toxic"`, `"severe_toxic"`, `"obscene"`, `"threat"`, `"insult"`, `"identity_hate"`. The last six columns represent the labels of the `comment_text`.
+Let us take the [toxic comment dataset](https://www.kaggle.com/c/jigsaw-toxic-comment-classification-challenge/data) published on [kaggle](https://www.kaggle.com/) as an example. (Note: you will need to create a kaggle account in order to download the dataset.) The data file `train.csv` in this dataset (not included in this repository) has the following columns: `"id"`, `"comment_text"`, `"toxic"`, `"severe_toxic"`, `"obscene"`, `"threat"`, `"insult"`, `"identity_hate"`. The last six columns represent the labels of the `comment_text`.
 
 The python script in [`example/csv2sqlite.py`](https://github.com/yam-ai/bert-multilabel-classifier/blob/master/example/csv2sqlite.py) can process `train.csv` and save the data in a sqlite file.
 
