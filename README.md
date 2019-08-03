@@ -1,4 +1,4 @@
-# Multilabel Classification with BERT
+# Multilabel Text Classification with BERT
 
 Bidirectional Encoder Representations from Transformers (BERT) is a recent Natural Language Processing (NLP) technique proposed by the paper [BERT: Pre-training of Deep Bidirectional Transformers for Language Understanding](https://arxiv.org/abs/1810.04805). As the paper describes:
 > Unlike recent language representation models, BERT is designed to pre-train deep bidirectional representations from unlabeled text by jointly conditioning on both left and right context in all layers. As a result, the pre-trained BERT model can be fine-tuned with just one additional output layer to create state-of-the-art models for a wide range of tasks, such as question answering and language inference, without substantial task-specific architecture modifications.
@@ -9,8 +9,7 @@ This project adapts [BERT](https://github.com/google-research/bert) to perform a
 
 ## Usage
 
-
-### 1. Prepare the dataset as a sqlite database  
+### 1. Prepare the dataset as a sqlite database
 The training data is expected to be given as a [sqlite](https://www.sqlite.org/index.html) database. It consists of two tables, `texts` and `labels`, storing the texts and their associated labels:
 ```SQL
 CREATE TABLE IF NOT EXISTS texts (
@@ -22,38 +21,46 @@ CREATE TABLE IF NOT EXISTS labels (
     text_id text NOT NULL,
     FOREIGN KEY (text_id) REFERENCES texts(id)
 );
-CREATE INDEX label_index ON labels (label);
+CREATE INDEX IF NOT EXISTS label_index ON labels (label);
 ```
 An empty example sqlite file is in [`example/data.db`](https://github.com/yam-ai/bert-multilabel-classifier/blob/master/example/data.db).
 
-Let us take the [toxic comment dataset](https://www.kaggle.com/c/jigsaw-toxic-comment-classification-challenge/data) as an example. The data file `train.csv` in this dataset (not included in this repository) has the following columns: `"id"`, `"comment_text"`, `"toxic"`, `"severe_toxic"`, `"obscene"`, `"threat"`, `"insult"`, `"identity_hate"`. The last six columns represent the labels of the `comment_text`.
+Let us take the [toxic comment dataset](https://www.kaggle.com/c/jigsaw-toxic-comment-classification-challenge/data) published on [kaggle](https://www.kaggle.com/) as an example. (Note: you will need to create a kaggle account in order to download the dataset.) The training data file `train.csv` (not provided by this repository) in the downloaded dataset has the following columns: `id`, `comment_text`, `toxic`, `severe_toxic`, `obscene`, `threat`, `insult`, `identity_hate`. The last six columns represent the labels of the `comment_text`.
 
-The python script in [`example/csv2sqlite.py`](https://github.com/yam-ai/bert-multilabel-classifier/blob/master/example/csv2sqlite.py) can process `train.csv` and save the data in a sqlite file.
+The python script in [`example/csv2sqlite.py`](https://github.com/yam-ai/bert-multilabel-classifier/blob/master/example/csv2sqlite.py) can process `train.csv` and save the data in a sqlite file `data.db`.
 
+To convert `train.csv` to `data.db`, run the following commands:
+```sh
+mv /downloads/toxic-comment/train.csv example/
+python3 csv2sqlite.py
+```
 
-### 2. Download pretrained models  
+### 2. Download pretrained models
 Download and extract pretrained models from [BERT](https://github.com/google-research/bert), such as the [BERT-Base, Multilingual Cased](https://storage.googleapis.com/bert_models/2018_11_23/multi_cased_L-12_H-768_A-12.zip) model.
 
 
-### 3. Modify hyperparameters in `train.sh`  
-The training hyperparameters such as `train_batch_size`, `learning_rate`, `num_train_epochs`, `max_seq_length` can be modified in `train.sh`(https://github.com/yam-ai/bert-multilabel-classifier/blob/master/train.sh).
+### 3. Tune hyperparameters
+The training hyperparameters such as `train_batch_size`, `learning_rate`, `num_train_epochs`, `max_seq_length` can be modified in [`train.sh`](https://github.com/yam-ai/bert-multilabel-classifier/blob/master/train.sh).
 
 
 ### 4. Train  
-Build the docker image for training  
+Build the docker image for training:
 ```sh
 docker build -f train.Dockerfile -t classifier-train .
 ```  
-Assume the paths of the pretrained model, the sqlite file and the desired output model directory are `$BERT_DIR`, `$DATA_SQLITE` and `$OUTPUT_DIR` respectively. Run the training container by mounting the above volumes:
+
+Run the training container by mounting the above volumes:
 ```sh
 docker run -v $BERT_DIR:/bert -v $DATA_SQLITE:/data.db -v $OUTPUT_DIR:/output classifier-train
 ```
 
-At the end of training, `$OUTPUT_DIR` should contain a bunch of files, including a directory with number (a timestamp) as its name. For example, it has the form `$OUTPUT_DIR/1564483298/`. This is the output directory used for serving.
+* `$BERT_DIR` is the full path where the downloaded BERT pretrained model is unzipped to, e.g., `/downloads/multi_cased_L-12_H-768_A-12`.
+* `$DATA_SQLITE` is the full path to the loaded sqlite database, e.g. `/repos/bert-multilabel-classifier/example/data.db`.
+* `$OUTPUT_DIR` is the full path of the output directory, e.g., `/repos/bert-multilabel-classifier/example/output/`. After training, it will contain a bunch of files, including a directory with number (a timestamp) as its name. For example, the directory `$OUTPUT_DIR/1564483298/` stores the trained model to be used for serving.
 
 
 ### 5. Serve  
-Build the docker image for serving  
+Build the docker image for serving:
 ```sh
 docker build -f serve.Dockerfile -t classifier-serve .
 ```
@@ -64,7 +71,7 @@ docker run -v $OUTPUT_DIR/1564483298/:/model -p 8000:8000 classifier-serve
 ```
 
 
-### 6. Post an inference request
+### 6. Post inference HTTP requests
 
 Make an HTTP POST request to `http://localhost:8000/classifier` with a JSON body like the following:
 ```json
@@ -73,11 +80,15 @@ Make an HTTP POST request to `http://localhost:8000/classifier` with a JSON body
         {
             "id": 0,
             "text": "Testing comment"
+        },
+        {
+            "id": 1,
+            "text": "Testing comment 2"
         }
     ]
 }
 ```
-Then in reply we should get back a list of scores, indicating the likelihood of the labels for the input texts:
+Then in reply we should get back a list of scores, indicating the likelihoods of the labels for the input texts:
 ```json
 [
     {
@@ -91,6 +102,18 @@ Then in reply we should get back a list of scores, indicating the likelihood of 
         },
         "id": 0,
         "text": "Testing comment"
+    },
+    {
+        "scores": {
+            "threat": 0.0059891298847191576,
+            "obscene": 0.0221010747184729540,
+            "identity_hate": 0.0058583197573300494,
+            "toxic": 0.9830513028059336,
+            "insult": 0.013693094826978472,
+            "severe_toxic": 0.003128903130408483
+        },
+        "id": 1,
+        "text": "Testing comment 2"
     }
 ]
 ```

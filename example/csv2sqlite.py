@@ -28,7 +28,7 @@ schema = '''
             text_id text NOT NULL,
             FOREIGN KEY (text_id) REFERENCES texts(id)
         );
-        CREATE INDEX label_index ON labels (label);
+        CREATE INDEX IF NOT EXISTS label_index ON labels (label);
     '''
 conn = sqlite3.connect('data.db')
 cur = conn.cursor()
