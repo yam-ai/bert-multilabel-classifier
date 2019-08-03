@@ -71,7 +71,7 @@ docker run -v $OUTPUT_DIR/1564483298/:/model -p 8000:8000 classifier-serve
 ```
 
 
-### 6. Post an inference request
+### 6. Post inference HTTP requests
 
 Make an HTTP POST request to `http://localhost:8000/classifier` with a JSON body like the following:
 ```json
