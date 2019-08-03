@@ -10,7 +10,7 @@ This project adapts [BERT](https://github.com/google-research/bert) to perform a
 ## Usage
 
 
-### 1. Prepare the dataset as a sqlite database  
+### 1. Prepare the dataset as a sqlite database
 The training data is expected to be given as a [sqlite](https://www.sqlite.org/index.html) database. It consists of two tables, `texts` and `labels`, storing the texts and their associated labels:
 ```SQL
 CREATE TABLE IF NOT EXISTS texts (
@@ -28,7 +28,7 @@ An empty example sqlite file is in [`example/data.db`](https://github.com/yam-ai
 
 Let us take the [toxic comment dataset](https://www.kaggle.com/c/jigsaw-toxic-comment-classification-challenge/data) published on [kaggle](https://www.kaggle.com/) as an example. (Note: you will need to create a kaggle account in order to download the dataset.) The training data file `train.csv` (not provided by this repository) in the downloaded dataset has the following columns: `id`, `comment_text`, `toxic`, `severe_toxic`, `obscene`, `threat`, `insult`, `identity_hate`. The last six columns represent the labels of the `comment_text`.
 
-The python script in [`example/csv2sqlite.py`](https://github.com/yam-ai/bert-multilabel-classifier/blob/master/example/csv2sqlite.py) can process `train.csv` and save the data in a sqlite file.
+The python script in [`example/csv2sqlite.py`](https://github.com/yam-ai/bert-multilabel-classifier/blob/master/example/csv2sqlite.py) can process `train.csv` and save the data in a sqlite file `data.db`.
 
 To convert `train.csv` to `data.db`, run the following commands:
 ```sh
@@ -45,7 +45,7 @@ The training hyperparameters such as `train_batch_size`, `learning_rate`, `num_t
 
 
 ### 4. Train  
-Build the docker image for training  
+Build the docker image for training:
 ```sh
 docker build -f train.Dockerfile -t classifier-train .
 ```  
@@ -61,7 +61,7 @@ docker run -v $BERT_DIR:/bert -v $DATA_SQLITE:/data.db -v $OUTPUT_DIR:/output cl
 
 
 ### 5. Serve  
-Build the docker image for serving  
+Build the docker image for serving:
 ```sh
 docker build -f serve.Dockerfile -t classifier-serve .
 ```
