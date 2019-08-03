@@ -80,11 +80,15 @@ Make an HTTP POST request to `http://localhost:8000/classifier` with a JSON body
         {
             "id": 0,
             "text": "Testing comment"
+        },
+        {
+            "id": 1,
+            "text": "Testing comment 2"
         }
     ]
 }
 ```
-Then in reply we should get back a list of scores, indicating the likelihood of the labels for the input texts:
+Then in reply we should get back a list of scores, indicating the likelihoods of the labels for the input texts:
 ```json
 [
     {
@@ -98,6 +102,18 @@ Then in reply we should get back a list of scores, indicating the likelihood of 
         },
         "id": 0,
         "text": "Testing comment"
+    },
+    {
+        "scores": {
+            "threat": 0.0059891298847191576,
+            "obscene": 0.0221010747184729540,
+            "identity_hate": 0.0058583197573300494,
+            "toxic": 0.9830513028059336,
+            "insult": 0.013693094826978472,
+            "severe_toxic": 0.003128903130408483
+        },
+        "id": 1,
+        "text": "Testing comment 2"
     }
 ]
 ```
