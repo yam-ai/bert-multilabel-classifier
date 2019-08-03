@@ -9,7 +9,6 @@ This project adapts [BERT](https://github.com/google-research/bert) to perform a
 
 ## Usage
 
-
 ### 1. Prepare the dataset as a sqlite database
 The training data is expected to be given as a [sqlite](https://www.sqlite.org/index.html) database. It consists of two tables, `texts` and `labels`, storing the texts and their associated labels:
 ```SQL
@@ -32,8 +31,8 @@ The python script in [`example/csv2sqlite.py`](https://github.com/yam-ai/bert-mu
 
 To convert `train.csv` to `data.db`, run the following commands:
 ```sh
-$ mv /some/path/train.csv example/
-$ python3 csv2sqlite.py
+mv /some/path/train.csv example/
+python3 csv2sqlite.py
 ```
 
 ### 2. Download pretrained models
