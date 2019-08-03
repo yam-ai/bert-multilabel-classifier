@@ -31,7 +31,7 @@ The python script in [`example/csv2sqlite.py`](https://github.com/yam-ai/bert-mu
 
 To convert `train.csv` to `data.db`, run the following commands:
 ```sh
-mv /some/path/train.csv example/
+mv /downloads/toxic-comment/train.csv example/
 python3 csv2sqlite.py
 ```
 
