@@ -31,93 +31,111 @@ The python script in [`example/csv2sqlite.py`](https://github.com/yam-ai/bert-mu
 
 To convert `train.csv` to `data.db`, run the following commands:
 ```sh
-mv /downloads/toxic-comment/train.csv example/
-python3 csv2sqlite.py
+$ python3 csv2sqlite.py -i /downloads/toxic-comment/train.csv -o /repos/bert-multilabel-classifier/example/data.db
 ```
+You can also use the `-n` flag to tell to convert only a portion of the csv file to limit the size of the training database. For example, you can use `-n 1000` to convert only the first 1,000 entries of the csv file into training database. This may be necessary if there is not enough memory to train the model with the entire raw training set.
 
-### 2. Download pretrained models
+### 2. Download the pretrained model
 Download and extract pretrained models from [BERT](https://github.com/google-research/bert), such as the [BERT-Base, Multilingual Cased](https://storage.googleapis.com/bert_models/2018_11_23/multi_cased_L-12_H-768_A-12.zip) model.
 
 
-### 3. Tune hyperparameters
+### 3. Tune the hyperparameters
 The training hyperparameters such as `train_batch_size`, `learning_rate`, `num_train_epochs`, `max_seq_length` can be modified in [`train.sh`](https://github.com/yam-ai/bert-multilabel-classifier/blob/master/train.sh).
 
 
-### 4. Train  
+### 4. Train the model
 Build the docker image for training:
 ```sh
-docker build -f train.Dockerfile -t classifier-train .
+$ docker build -f train.Dockerfile -t classifier-train .
 ```  
 
 Run the training container by mounting the above volumes:
 ```sh
-docker run -v $BERT_DIR:/bert -v $DATA_SQLITE:/data.db -v $OUTPUT_DIR:/output classifier-train
+$ docker run -v $BERT_DIR:/bert -v $DATA_SQLITE:/data.db -v $OUTPUT_DIR:/output classifier-train
 ```
 
 * `$BERT_DIR` is the full path where the downloaded BERT pretrained model is unzipped to, e.g., `/downloads/multi_cased_L-12_H-768_A-12`.
-* `$DATA_SQLITE` is the full path to the loaded sqlite database, e.g. `/repos/bert-multilabel-classifier/example/data.db`.
-* `$OUTPUT_DIR` is the full path of the output directory, e.g., `/repos/bert-multilabel-classifier/example/output/`. After training, it will contain a bunch of files, including a directory with number (a timestamp) as its name. For example, the directory `$OUTPUT_DIR/1564483298/` stores the trained model to be used for serving.
+* `$DATA_SQLITE` is the full path to the loaded sqlite database, e.g. `/data/example/data.db`.
+* `$OUTPUT_DIR` is the full path of the output directory, e.g., `/data/example/output/`. After training, it will contain a bunch of files, including a directory with number (a timestamp) as its name. For example, the directory `$OUTPUT_DIR/1564483298/` stores the trained model to be used for serving.
 
 
-### 5. Serve  
+### 5. Serve the model
 Build the docker image for serving:
 ```sh
-docker build -f serve.Dockerfile -t classifier-serve .
+$ docker build -f serve.Dockerfile -t classifier-serve .
 ```
 
 Run the serving container by mounting the output directory above and expose a port:
 ```sh
-docker run -v $OUTPUT_DIR/1564483298/:/model -p 8000:8000 classifier-serve
+$ docker run -v $OUTPUT_DIR/1564483298/:/model -p 8000:8000 classifier-serve
 ```
 
 
-### 6. Post inference HTTP requests
+### 6. Post an inference HTTP request
 
 Make an HTTP POST request to `http://localhost:8000/classifier` with a JSON body like the following:
 ```json
-{
-    "texts": [
-        {
-            "id": 0,
-            "text": "Testing comment"
-        },
-        {
-            "id": 1,
-            "text": "Testing comment 2"
-        }
-    ]
+{ 
+   "texts":[ 
+      { 
+         "id":0,
+         "text":"Three great forces rule the world: stupidity, fear and greed."
+      },
+      { 
+         "id":1,
+         "text":"The fear of death is the most unjustified of all fears, for there's no risk of accident for someone who's dead"
+      }
+   ]
 }
 ```
-Then in reply we should get back a list of scores, indicating the likelihoods of the labels for the input texts:
+Then in reply we should get back a list of scores, indicating the likelihoods of the labels for the input texts (e.g., two Albert Einstein quotes as follows):
 ```json
-[
-    {
-        "scores": {
-            "threat": 0.0047899698838591576,
-            "obscene": 0.015161020681262016,
-            "identity_hate": 0.0059020197950303555,
-            "toxic": 0.9870702028274536,
-            "insult": 0.015693070366978645,
-            "severe_toxic": 0.003254803130403161
-        },
-        "id": 0,
-        "text": "Testing comment"
-    },
-    {
-        "scores": {
-            "threat": 0.0059891298847191576,
-            "obscene": 0.0221010747184729540,
-            "identity_hate": 0.0058583197573300494,
-            "toxic": 0.9830513028059336,
-            "insult": 0.013693094826978472,
-            "severe_toxic": 0.003128903130408483
-        },
-        "id": 1,
-        "text": "Testing comment 2"
-    }
+[ 
+   { 
+      "id":0,
+      "text":"Three great forces rule the world: stupidity, fear and greed.",
+      "scores":{ 
+         "identity_hate":0.007177263498306274,
+         "insult":0.5632272958755493,
+         "obscene":0.01373317837715149,
+         "severe_toxic":0.004234760999679565,
+         "threat":0.00850290060043335,
+         "toxic":0.9498064517974854
+      }
+   },
+   { 
+      "id":1,
+      "text":"The fear of death is the most unjustified of all fears, for there's no risk of accident for someone who's dead",
+      "scores":{ 
+         "identity_hate":0.019688785076141357,
+         "insult":0.026154309511184692,
+         "obscene":0.0172310471534729,
+         "severe_toxic":0.04065057635307312,
+         "threat":0.5432639718055725,
+         "toxic":0.9557554721832275
+      }
+   }
 ]
 ```
 
+You can test the API using `curl` as follows:
 
-### 7. GPU
-If GPU is available, acceleration of training and serving can be acheived by running [`nvidia-docker`](https://github.com/NVIDIA/nvidia-docker). The base image in [`train.Dockerfile`](https://github.com/yam-ai/bert-multilabel-classifier/blob/master/train.Dockerfile) and [`serve.Dockerfile`](https://github.com/yam-ai/bert-multilabel-classifier/blob/master/serve.Dockerfile) should also be changed to the GPU version.
+```sh
+$ curl -X POST http://localhost:8000/classifier -H "Content-Type: application/json" -d $'{"texts":[{"id":0,"text":"Three great forces rule the world: stupidity, fear and greed."},{"id":1,"text":"The fear of death is the most unjustified of all fears, for there\'s no risk of accident for someone who\'s dead"}]}'
+[{"id": 0, "text": "Three great forces rule the world: stupidity, fear and greed.", "scores": {"identity_hate": 0.007177263498306274, "insult": 0.5632272958755493, "obscene": 0.01373317837715149, "severe_toxic": 0.004234760999679565, "threat": 0.00850290060043335, "toxic": 0.9498064517974854}}, {"id": 1, "text": "The fear of death is the most unjustified of all fears, for there's no risk of accident for someone who's dead", "scores": {"identity_hate": 0.019688785076141357, "insult": 0.026154309511184692, "obscene": 0.0172310471534729, "severe_toxic": 0.04065057635307312, "threat": 0.5432639718055725, "toxic": 0.9557554721832275}}]
+```
+
+### 7. Using a GPU
+If GPU is available, acceleration of training and serving can be acheived by running [`nvidia-docker`](https://github.com/NVIDIA/nvidia-docker). The base image in [`train.Dockerfile`](https://github.com/yam-ai/bert-multilabel-classifier/blob/master/train.Dockerfile) and [`serve.Dockerfile`](https://github.com/yam-ai/bert-multilabel-classifier/blob/master/serve.Dockerfile) should also be changed to the GPU version, i.e., `tensorflow:1.1x.y-gpu-py3`.
+
+After building the docker image, run `docker` using the `nvidia` runtime:
+
+```sh
+$ docker run --runtime nvida -v $BERT_DIR:/bert -v $DATA_SQLITE:/data.db -v $OUTPUT_DIR:/output classifier-train
+```
+or 
+```sh
+$ docker run --runtime nvidia -v $OUTPUT_DIR/1564483298/:/model -p 8000:8000 classifier-serve
+```
+
+If you are building the project from the source code directly (i.e., not using Docker), you also need to modify [`requirements.txt`](https://github.com/yam-ai/bert-multilabel-classifier/blob/master/requirements.txt) to use `tensorflow-gpu`.
