@@ -35,15 +35,15 @@ $ python3 csv2sqlite.py -i /downloads/toxic-comment/train.csv -o /repos/bert-mul
 ```
 You can also use the `-n` flag to tell to convert only a portion of the csv file to limit the size of the training database. For example, you can use `-n 1000` to convert only the first 1,000 entries of the csv file into training database. This may be necessary if there is not enough memory to train the model with the entire raw training set.
 
-### 2. Download pretrained models
+### 2. Download the pretrained model
 Download and extract pretrained models from [BERT](https://github.com/google-research/bert), such as the [BERT-Base, Multilingual Cased](https://storage.googleapis.com/bert_models/2018_11_23/multi_cased_L-12_H-768_A-12.zip) model.
 
 
-### 3. Tune hyperparameters
+### 3. Tune the hyperparameters
 The training hyperparameters such as `train_batch_size`, `learning_rate`, `num_train_epochs`, `max_seq_length` can be modified in [`train.sh`](https://github.com/yam-ai/bert-multilabel-classifier/blob/master/train.sh).
 
 
-### 4. Train  
+### 4. Train the model
 Build the docker image for training:
 ```sh
 $ docker build -f train.Dockerfile -t classifier-train .
@@ -59,7 +59,7 @@ $ docker run -v $BERT_DIR:/bert -v $DATA_SQLITE:/data.db -v $OUTPUT_DIR:/output 
 * `$OUTPUT_DIR` is the full path of the output directory, e.g., `/data/example/output/`. After training, it will contain a bunch of files, including a directory with number (a timestamp) as its name. For example, the directory `$OUTPUT_DIR/1564483298/` stores the trained model to be used for serving.
 
 
-### 5. Serve  
+### 5. Serve the model
 Build the docker image for serving:
 ```sh
 $ docker build -f serve.Dockerfile -t classifier-serve .
@@ -125,7 +125,7 @@ $ curl -X POST http://localhost:8000/classifier -H "Content-Type: application/js
 [{"id": 0, "text": "Three great forces rule the world: stupidity, fear and greed.", "scores": {"identity_hate": 0.007177263498306274, "insult": 0.5632272958755493, "obscene": 0.01373317837715149, "severe_toxic": 0.004234760999679565, "threat": 0.00850290060043335, "toxic": 0.9498064517974854}}, {"id": 1, "text": "The fear of death is the most unjustified of all fears, for there's no risk of accident for someone who's dead", "scores": {"identity_hate": 0.019688785076141357, "insult": 0.026154309511184692, "obscene": 0.0172310471534729, "severe_toxic": 0.04065057635307312, "threat": 0.5432639718055725, "toxic": 0.9557554721832275}}]
 ```
 
-### 7. Using GPU
+### 7. Using a GPU
 If GPU is available, acceleration of training and serving can be acheived by running [`nvidia-docker`](https://github.com/NVIDIA/nvidia-docker). The base image in [`train.Dockerfile`](https://github.com/yam-ai/bert-multilabel-classifier/blob/master/train.Dockerfile) and [`serve.Dockerfile`](https://github.com/yam-ai/bert-multilabel-classifier/blob/master/serve.Dockerfile) should also be changed to the GPU version, i.e., `tensorflow:1.1x.y-gpu-py3`.
 
 After building the docker image, run `docker` using the `nvidia` runtime:
