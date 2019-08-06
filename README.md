@@ -132,4 +132,4 @@ or
 docker run --runtime nvidia -v $OUTPUT_DIR/1564483298/:/model -p 8000:8000 classifier-serve
 ```
 
-If you are building the runtime directly using the source code (i.e., not Docker), you should modify [`requirements.txt`](https://github.com/yam-ai/bert-multilabel-classifier/blob/master/requirements.txt) to use `tensorflow-gpu`.
+If you are building the project from the source code directly (i.e., not using Docker), you also need to modify [`requirements.txt`](https://github.com/yam-ai/bert-multilabel-classifier/blob/master/requirements.txt) to use `tensorflow-gpu`.
