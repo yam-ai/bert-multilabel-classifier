@@ -14,38 +14,87 @@
 # limitations under the License.
 #
 
+import sys
 import sqlite3
 import csv
+import getopt
+
+dbfile = 'data.db'
+trainfile = 'train.csv'
+numitems = -1
 
 # Create tables
 schema = '''
-        CREATE TABLE IF NOT EXISTS texts (
+        DROP TABLE IF EXISTS texts;
+        CREATE TABLE texts (
             id TEXT NOT NULL PRIMARY KEY,
             text TEXT NOT NULL
         );
-        CREATE TABLE IF NOT EXISTS labels (
+        DROP TABLE IF EXISTS labels;
+        CREATE TABLE labels (
             label TEXT NOT NULL,
             text_id text NOT NULL,
             FOREIGN KEY (text_id) REFERENCES texts(id)
         );
-        CREATE INDEX IF NOT EXISTS label_index ON labels (label);
+        DROP INDEX IF EXISTS label_index;
+        CREATE INDEX label_index ON labels (label);
     '''
-conn = sqlite3.connect('data.db')
+
+opts, _ = getopt.getopt(sys.argv[1:], 'd:t:n:')
+for opt, arg in opts:
+    if opt == '-d':
+        dbfile = arg
+    if opt == '-t':
+        trainfile = arg
+    if opt == '-n':
+        try:
+            numitems = int(arg)
+        except:
+            sys.stderr('Invalid number of entries for -n')
+            sys.exit(1)
+
+print('number of entries = {}\nsource training csv file = {}\ntarget training sqlite file = {}'.format(numitems, trainfile, dbfile))
+
+try:
+    conn = sqlite3.connect(dbfile)
+except:
+    sys.stderr('Failed to open sqlite file {}'.format(dbfile))
+    sys.exit(1)
 cur = conn.cursor()
 cur.executescript(schema)
 
 # Insert data
-with open('train.csv', newline='') as f:
-    reader = csv.reader(f)
-    header = next(reader)
-    print(header)
-    for row in reader:
-        id = row[0]
-        text = row[1]
-        cur.execute('INSERT INTO texts (id, text) VALUES (?,?)', (id, text))
-        for i in range(2, 8):
-            if row[i] == '1':
-                cur.execute(
-                    'INSERT INTO labels (label, text_id) VALUES (?,?)', (header[i], id))
+try:
+    with open(trainfile, newline='') as f:
+        reader = csv.reader(f)
+        header = next(reader)
+        print('header = {}'.format(header))
+        print()
+        l = 0
+        for row in reader:
+            l = l + 1
+            if numitems >= 0:
+                if l > numitems:
+                    print('Loaded {} entries.'.format(l-1, dbfile))
+                    break;
+            if l % 1000 == 0:
+                print('Loading {} entries...'.format(l))
+            id = row[0]
+            text = row[1]
+            cur.execute('INSERT INTO texts (id, text) VALUES (?,?)', (id, text))
+            for i in range(2, 8):
+                if row[i] == '1':
+                    cur.execute(
+                        'INSERT INTO labels (label, text_id) VALUES (?,?)', (header[i], id))
+except IOError as e:
+    sys.stderr('Failed to open training csv file {}: {}'.format(trainfile, e))
+    sys.exit(1)
+except sqlite3.Error as e:
+    sys.stderr('Failed to write training data to database file {}: e'.format(dbfile, e))
+    sys.exit(1)
 
-conn.commit()
+try:
+    conn.commit()
+except sqlite3.Error as e:
+    sys.stderr('Failed to commit writes to database file {}: e'.format(dbfile, e))
+    sys.exit(1)
