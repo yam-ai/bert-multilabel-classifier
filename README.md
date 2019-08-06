@@ -33,7 +33,7 @@ To convert `train.csv` to `data.db`, run the following commands:
 ```sh
 $ python3 csv2sqlite.py -i /downloads/toxic-comment/train.csv -o /repos/bert-multilabel-classifier/example/data.db
 ```
-You can also use the `-n` flag to tell to convert only a portion of the csv file to limit the size of the training set, e.g., `-n 1000` to convert only the first 1,000 entries.
+You can also use the `-n` flag to tell to convert only a portion of the csv file to limit the size of the training set, e.g., `-n 1000` to convert only the first 1,000 entries. This may be necessary if there is not enough memory to train the model with the entire training set.
 
 ### 2. Download pretrained models
 Download and extract pretrained models from [BERT](https://github.com/google-research/bert), such as the [BERT-Base, Multilingual Cased](https://storage.googleapis.com/bert_models/2018_11_23/multi_cased_L-12_H-768_A-12.zip) model.
