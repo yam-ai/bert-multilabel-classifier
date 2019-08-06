@@ -88,7 +88,7 @@ Make an HTTP POST request to `http://localhost:8000/classifier` with a JSON body
    ]
 }
 ```
-Then in reply we should get back a list of scores, indicating the likelihoods of the labels for the input texts:
+Then in reply we should get back a list of scores, indicating the likelihoods of the labels for the input texts (e.g., two Albert Einstein quotes as follows):
 ```json
 [ 
    { 
@@ -118,7 +118,7 @@ Then in reply we should get back a list of scores, indicating the likelihoods of
 ]
 ```
 
-For example, you can test the API using `curl` as follows:
+You can test the API using `curl` as follows:
 
 ```sh
 $ curl -X POST http://localhost:8000/classifier -H "Content-Type: application/json" -d $'{"texts":[{"id":0,"text":"Three great forces rule the world: stupidity, fear and greed."},{"id":1,"text":"The fear of death is the most unjustified of all fears, for there\'s no risk of accident for someone who\'s dead"}]}'
