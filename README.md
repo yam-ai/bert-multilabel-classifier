@@ -55,8 +55,8 @@ $ docker run -v $BERT_DIR:/bert -v $DATA_SQLITE:/data.db -v $OUTPUT_DIR:/output 
 ```
 
 * `$BERT_DIR` is the full path where the downloaded BERT pretrained model is unzipped to, e.g., `/downloads/multi_cased_L-12_H-768_A-12`.
-* `$DATA_SQLITE` is the full path to the loaded sqlite database, e.g. `/repos/bert-multilabel-classifier/example/data.db`.
-* `$OUTPUT_DIR` is the full path of the output directory, e.g., `/repos/bert-multilabel-classifier/example/output/`. After training, it will contain a bunch of files, including a directory with number (a timestamp) as its name. For example, the directory `$OUTPUT_DIR/1564483298/` stores the trained model to be used for serving.
+* `$DATA_SQLITE` is the full path to the loaded sqlite database, e.g. `/data/example/data.db`.
+* `$OUTPUT_DIR` is the full path of the output directory, e.g., `/data/example/output/`. After training, it will contain a bunch of files, including a directory with number (a timestamp) as its name. For example, the directory `$OUTPUT_DIR/1564483298/` stores the trained model to be used for serving.
 
 
 ### 5. Serve  
