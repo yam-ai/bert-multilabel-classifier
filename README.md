@@ -119,5 +119,17 @@ Then in reply we should get back a list of scores, indicating the likelihoods of
 ```
 
 
-### 7. GPU
-If GPU is available, acceleration of training and serving can be acheived by running [`nvidia-docker`](https://github.com/NVIDIA/nvidia-docker). The base image in [`train.Dockerfile`](https://github.com/yam-ai/bert-multilabel-classifier/blob/master/train.Dockerfile) and [`serve.Dockerfile`](https://github.com/yam-ai/bert-multilabel-classifier/blob/master/serve.Dockerfile) should also be changed to the GPU version.
+### 7. Using GPU
+If GPU is available, acceleration of training and serving can be acheived by running [`nvidia-docker`](https://github.com/NVIDIA/nvidia-docker). The base image in [`train.Dockerfile`](https://github.com/yam-ai/bert-multilabel-classifier/blob/master/train.Dockerfile) and [`serve.Dockerfile`](https://github.com/yam-ai/bert-multilabel-classifier/blob/master/serve.Dockerfile) should also be changed to the GPU version, i.e., `tensorflow:1.1x.y-gpu-py3`.
+
+After building the docker image, run `docker` using the `nvidia` runtime:
+
+```sh
+docker run --runtime nvida -v $BERT_DIR:/bert -v $DATA_SQLITE:/data.db -v $OUTPUT_DIR:/output classifier-train
+```
+or 
+```sh
+docker run --runtime nvidia -v $OUTPUT_DIR/1564483298/:/model -p 8000:8000 classifier-serve
+```
+
+If you are building the runtime directly using the source code (i.e., not Docker), you should modify [`requirements.txt`](https://github.com/yam-ai/bert-multilabel-classifier/blob/master/requirements.txt) to use `tensorflow-gpu`.
