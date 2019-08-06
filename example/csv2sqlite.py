@@ -39,12 +39,15 @@ schema = '''
         DROP INDEX IF EXISTS label_index;
         CREATE INDEX label_index ON labels (label);
     '''
-
-opts, _ = getopt.getopt(sys.argv[1:], 'd:t:n:')
+try:
+    opts, _ = getopt.getopt(sys.argv[1:], 'i:o:n:')
+except getopt.GetoptError as e:
+    print('Invalid argument: {}'.format(e), file=sys.stderr)
+    sys.exit(1)
 for opt, arg in opts:
-    if opt == '-d':
+    if opt == '-o':
         dbfile = arg
-    if opt == '-t':
+    if opt == '-i':
         trainfile = arg
     if opt == '-n':
         try:
@@ -58,7 +61,7 @@ print('number of entries = {}\nsource training csv file = {}\ntarget training sq
 try:
     conn = sqlite3.connect(dbfile)
 except:
-    sys.stderr('Failed to open sqlite file {}'.format(dbfile))
+    print('Failed to open sqlite file {}'.format(dbfile), file=sys.stderr)
     sys.exit(1)
 cur = conn.cursor()
 cur.executescript(schema)
@@ -87,14 +90,14 @@ try:
                     cur.execute(
                         'INSERT INTO labels (label, text_id) VALUES (?,?)', (header[i], id))
 except IOError as e:
-    sys.stderr('Failed to open training csv file {}: {}'.format(trainfile, e))
+    print('Failed to open training csv file {}: {}'.format(trainfile, e), file=sys.stderr)
     sys.exit(1)
 except sqlite3.Error as e:
-    sys.stderr('Failed to write training data to database file {}: e'.format(dbfile, e))
+    print('Failed to write training data to database file {}: e'.format(dbfile, e), file=sys.stderr)
     sys.exit(1)
 
 try:
     conn.commit()
 except sqlite3.Error as e:
-    sys.stderr('Failed to commit writes to database file {}: e'.format(dbfile, e))
+    print('Failed to commit writes to database file {}: e'.format(dbfile, e), file=sys.stderr)
     sys.exit(1)
