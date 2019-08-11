@@ -53,7 +53,7 @@ for opt, arg in opts:
         try:
             numitems = int(arg)
         except:
-            sys.stderr('Invalid number of entries for -n')
+            print('Invalid number of entries for -n', file=sys.stderr)
             sys.exit(1)
 
 print('number of entries = {}\nsource training csv file = {}\ntarget training sqlite file = {}'.format(numitems, trainfile, dbfile))
