@@ -65,7 +65,7 @@ Build the docker image for the classification server:
 docker build -f serve.Dockerfile -t classifier-serve .
 ```
 
-Run the serving container by mounting the output directory above and expose a port:
+Run the serving container by mounting the output directory above and exposing the HTTP port:
 ```sh
 docker run -v $OUTPUT_DIR/1564483298/:/model -p 8000:8000 classifier-serve
 ```
