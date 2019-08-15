@@ -22,6 +22,7 @@ CREATE TABLE IF NOT EXISTS labels (
     FOREIGN KEY (text_id) REFERENCES texts(id)
 );
 CREATE INDEX IF NOT EXISTS label_index ON labels (label);
+CREATE INDEX IF NOT EXISTS text_id_index ON labels (text_id);
 ```
 An empty example sqlite file is in [`example/data.db`](https://github.com/yam-ai/bert-multilabel-classifier/blob/master/example/data.db).
 
