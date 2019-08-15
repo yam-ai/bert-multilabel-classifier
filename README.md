@@ -22,6 +22,7 @@ CREATE TABLE IF NOT EXISTS labels (
     FOREIGN KEY (text_id) REFERENCES texts(id)
 );
 CREATE INDEX IF NOT EXISTS label_index ON labels (label);
+CREATE INDEX IF NOT EXISTS text_id_index ON labels (text_id);
 ```
 An empty example sqlite file is in [`example/data.db`](https://github.com/yam-ai/bert-multilabel-classifier/blob/master/example/data.db).
 
@@ -65,7 +66,7 @@ Build the docker image for the classification server:
 docker build -f serve.Dockerfile -t classifier-serve .
 ```
 
-Run the serving container by mounting the output directory above and expose a port:
+Run the serving container by mounting the output directory above and exposing the HTTP port:
 ```sh
 docker run -v $OUTPUT_DIR/1564483298/:/model -p 8000:8000 classifier-serve
 ```

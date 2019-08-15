@@ -12,7 +12,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-#
 
 import sys
 import sqlite3
@@ -38,6 +37,7 @@ schema = '''
         );
         DROP INDEX IF EXISTS label_index;
         CREATE INDEX label_index ON labels (label);
+        CREATE INDEX text_id_index ON labels (text_id);
     '''
 try:
     opts, _ = getopt.getopt(sys.argv[1:], 'i:o:n:')
@@ -56,7 +56,8 @@ for opt, arg in opts:
             print('Invalid number of entries for -n', file=sys.stderr)
             sys.exit(1)
 
-print('number of entries = {}\nsource training csv file = {}\ntarget training sqlite file = {}'.format(numitems, trainfile, dbfile))
+print('number of entries = {}\nsource training csv file = {}\ntarget training sqlite file = {}'.format(
+    numitems, trainfile, dbfile))
 
 try:
     conn = sqlite3.connect(dbfile)
@@ -79,25 +80,29 @@ try:
             if numitems >= 0:
                 if l > numitems:
                     print('Loaded {} entries.'.format(l-1, dbfile))
-                    break;
+                    break
             if l % 1000 == 0:
                 print('Loading {} entries...'.format(l))
             id = row[0]
             text = row[1]
-            cur.execute('INSERT INTO texts (id, text) VALUES (?,?)', (id, text))
+            cur.execute(
+                'INSERT INTO texts (id, text) VALUES (?,?)', (id, text))
             for i in range(2, 8):
                 if row[i] == '1':
                     cur.execute(
                         'INSERT INTO labels (label, text_id) VALUES (?,?)', (header[i], id))
 except IOError as e:
-    print('Failed to open training csv file {}: {}'.format(trainfile, e), file=sys.stderr)
+    print('Failed to open training csv file {}: {}'.format(
+        trainfile, e), file=sys.stderr)
     sys.exit(1)
 except sqlite3.Error as e:
-    print('Failed to write training data to database file {}: e'.format(dbfile, e), file=sys.stderr)
+    print('Failed to write training data to database file {}: e'.format(
+        dbfile, e), file=sys.stderr)
     sys.exit(1)
 
 try:
     conn.commit()
 except sqlite3.Error as e:
-    print('Failed to commit writes to database file {}: e'.format(dbfile, e), file=sys.stderr)
+    print('Failed to commit writes to database file {}: e'.format(
+        dbfile, e), file=sys.stderr)
     sys.exit(1)
