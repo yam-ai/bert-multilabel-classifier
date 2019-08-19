@@ -27,20 +27,15 @@ import tensorflow as tf
 import data
 import classifier
 
-flags = tf.flags
+import settings
 
+flags = tf.flags
 FLAGS = flags.FLAGS
 
 # Required parameters
 flags.DEFINE_string(
-    "data_sqlite", None,
-    "The input data in sqlite file. "
-    "Should contain the texts and labels for the task.")
-
-flags.DEFINE_string(
-    "train_eval_test_ratio", "7,3,0",
-    "The ratio of samples for training, evaluation and testing"
-)
+    "train_dir", None,
+    "The directory which contains the sqlite file of training data.")
 
 flags.DEFINE_string(
     "bert_config_file", None,
@@ -61,12 +56,12 @@ flags.DEFINE_string(
     "Initial checkpoint (usually from a pre-trained BERT model).")
 
 flags.DEFINE_bool(
-    "do_lower_case", False,
+    "do_lower_case", settings.do_lower_case,
     "Whether to lower case the input text. Should be True for uncased "
     "models and False for cased models.")
 
 flags.DEFINE_integer(
-    "max_seq_length", 128,
+    "max_seq_length", settings.max_seq_length,
     "The maximum total input sequence length after WordPiece tokenization. "
     "Sequences longer than this will be truncated, and sequences shorter "
     "than this will be padded.")
@@ -79,16 +74,18 @@ flags.DEFINE_bool(
     "do_predict", False,
     "Whether to run the model in inference mode on the test set.")
 
-flags.DEFINE_integer("train_batch_size", 32, "Total batch size for training.")
+flags.DEFINE_integer(
+    "train_batch_size", settings.train_batch_size, "Total batch size for training.")
 
-flags.DEFINE_integer("eval_batch_size", 8, "Total batch size for eval.")
+flags.DEFINE_integer(
+    "eval_batch_size", settings.eval_batch_size, "Total batch size for eval.")
 
 flags.DEFINE_integer("predict_batch_size", 8, "Total batch size for predict.")
 
-flags.DEFINE_float("learning_rate", 5e-5,
+flags.DEFINE_float("learning_rate", settings.learning_rate,
                    "The initial learning rate for Adam.")
 
-flags.DEFINE_float("num_train_epochs", 3.0,
+flags.DEFINE_float("num_train_epochs", settings.num_train_epochs,
                    "Total number of training epochs to perform.")
 
 flags.DEFINE_float(
@@ -149,7 +146,8 @@ def main(_):
 
     tf.gfile.MakeDirs(FLAGS.output_dir)
 
-    processor = data.MultiLabelTextSqliteProcessor(FLAGS.data_sqlite)
+    processor = data.MultiLabelTextSqliteProcessor(
+        os.path.join(FLAGS.train_dir, settings.train_db))
     label_list, num_labels = processor.get_labels()
 
     tokenizer = tokenization.FullTokenizer(
@@ -175,10 +173,8 @@ def main(_):
     num_train_steps = None
     num_warmup_steps = None
 
-    train_eval_test_ratio = [float(x)
-                             for x in FLAGS.train_eval_test_ratio.split(",")]
     train_examples, eval_examples, predict_examples = processor.get_examples(
-        train_eval_test_ratio)
+        settings.train_eval_test_ratio)
 
     if FLAGS.do_train:
         num_train_steps = int(
@@ -338,7 +334,7 @@ def main(_):
 
 
 if __name__ == "__main__":
-    flags.mark_flag_as_required("data_sqlite")
+    flags.mark_flag_as_required("train_dir")
     flags.mark_flag_as_required("vocab_file")
     flags.mark_flag_as_required("bert_config_file")
     flags.mark_flag_as_required("output_dir")
