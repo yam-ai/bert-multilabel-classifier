@@ -16,14 +16,43 @@
 
 import falcon
 from wsgiref import simple_server
+from falcon.media.validators import jsonschema
 
 import serve
+
+request_schema = {
+    'title': 'Label texts',
+    'description': 'Predict labels to be assigned on texts',
+    'type': 'object',
+    'required': ['texts'],
+    'properties': {
+        'texts': {
+            'type': 'array',
+            'description': 'A list of texts for labeling',
+            'items': {
+                'type': 'object',
+                'required': ['id', 'text'],
+                'properties': {
+                    'id': {
+                        'type': 'integer',
+                        'description': 'The id of the text'
+                    },
+                    'text': {
+                        'type': 'string',
+                        'description': 'A string of text'
+                    }
+                }
+            }
+        }
+    }
+}
 
 
 class ClassifierResource:
     def __init__(self, classifier):
         self.classifier = classifier
 
+    @jsonschema.validate(request_schema)
     def on_post(self, req, resp):
         """Handles POST requests"""
         texts = req.media.get("texts")
