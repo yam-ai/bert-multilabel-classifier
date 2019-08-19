@@ -67,4 +67,5 @@ class MultiLabelClassifierServer(object):
 
         for i, item in enumerate(texts):
             item["scores"] = dict(zip(self.labels, scores[i]))
+            del item["text"]
         return texts

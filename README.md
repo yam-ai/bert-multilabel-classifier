@@ -94,7 +94,6 @@ Then in reply you will get back a list of scores, indicating the likelihoods of 
 [ 
    { 
       "id":0,
-      "text":"Three great forces rule the world: stupidity, fear and greed.",
       "scores":{ 
          "identity_hate":0.007177263498306274,
          "insult":0.5632272958755493,
@@ -106,7 +105,6 @@ Then in reply you will get back a list of scores, indicating the likelihoods of 
    },
    { 
       "id":1,
-      "text":"The fear of death is the most unjustified of all fears, for there's no risk of accident for someone who's dead",
       "scores":{ 
          "identity_hate":0.019688785076141357,
          "insult":0.026154309511184692,
@@ -126,7 +124,7 @@ curl -X POST http://localhost:8000/classifier -H "Content-Type: application/json
 ```
 You will get the response like the following:
 ```sh
-[{"id": 0, "text": "Three great forces rule the world: stupidity, fear and greed.", "scores": {"identity_hate": 0.007177263498306274, "insult": 0.5632272958755493, "obscene": 0.01373317837715149, "severe_toxic": 0.004234760999679565, "threat": 0.00850290060043335, "toxic": 0.9498064517974854}}, {"id": 1, "text": "The fear of death is the most unjustified of all fears, for there's no risk of accident for someone who's dead", "scores": {"identity_hate": 0.019688785076141357, "insult": 0.026154309511184692, "obscene": 0.0172310471534729, "severe_toxic": 0.04065057635307312, "threat": 0.5432639718055725, "toxic": 0.9557554721832275}}]
+[{"id": 0, "scores": {"identity_hate": 0.007177263498306274, "insult": 0.5632272958755493, "obscene": 0.01373317837715149, "severe_toxic": 0.004234760999679565, "threat": 0.00850290060043335, "toxic": 0.9498064517974854}}, {"id": 1, "scores": {"identity_hate": 0.019688785076141357, "insult": 0.026154309511184692, "obscene": 0.0172310471534729, "severe_toxic": 0.04065057635307312, "threat": 0.5432639718055725, "toxic": 0.9557554721832275}}]
 ```
 
 ### 7. Using a GPU
