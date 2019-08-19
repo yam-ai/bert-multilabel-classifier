@@ -20,8 +20,8 @@ FROM tensorflow/tensorflow:1.14.0-py3
 WORKDIR /source/
 COPY . /source/
 
-RUN pip install -U pip \
-    && pip install falcon gunicorn
+RUN pip install -U pip setuptools \
+    && pip install falcon gunicorn jsonschema
 
 ENV PORT=8000
 ENV MODEL_DIR=/model
