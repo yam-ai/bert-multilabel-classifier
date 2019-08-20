@@ -163,15 +163,16 @@ class MultiLabelTextSqliteProcessor(object):
         conn = sqlite3.connect(self.sqlite_file)
         cursor = conn.cursor()
         cursor.execute(
-            "SELECT id, text, GROUP_CONCAT(label) FROM texts, labels ON texts.id = labels.text_id GROUP BY texts.id")
+            "SELECT id, text, GROUP_CONCAT(label) FROM texts LEFT JOIN labels ON texts.id = labels.text_id GROUP BY texts.id")
 
         examples = list()
         for row in cursor.fetchall():
             guid, text, labels_concat = row
             onehot_labels = [0] * self.num_labels
-            for x in labels_concat.split(","):
-                idx = self.label_to_idx[x]
-                onehot_labels[idx] = 1
+            if labels_concat is not None:
+                for x in labels_concat.split(","):
+                    idx = self.label_to_idx[x]
+                    onehot_labels[idx] = 1
             examples.append(InputExample(guid=guid, text=text,
                                          labels=onehot_labels))
         conn.close()

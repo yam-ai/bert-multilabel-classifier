@@ -17,11 +17,11 @@
 # FROM tensorflow/tensorflow:1.14.0-gpu-py3
 FROM tensorflow/tensorflow:1.14.0-py3
 
-WORKDIR /source/
-COPY . /source/
+WORKDIR /src/
+COPY . /src/
 
 ENV BERT_DIR=/bert
-ENV DATA_SQLITE=/data.db
-ENV OUTPUT_DIR=/output
+ENV TRAIN_DIR=/train
+ENV MODEL_DIR=/model
 
-CMD ["/source/train.sh"]
+CMD ["/src/train.sh"]
