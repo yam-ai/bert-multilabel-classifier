@@ -96,25 +96,25 @@ Then in reply you will get back a list of scores, indicating the likelihoods of 
 ```json
 [ 
    { 
-      "id":0,
-      "scores":{ 
-         "identity_hate":0.007177263498306274,
-         "insult":0.5632272958755493,
-         "obscene":0.01373317837715149,
-         "severe_toxic":0.004234760999679565,
-         "threat":0.00850290060043335,
-         "toxic":0.9498064517974854
+      "id": 0,
+      "scores": {
+         "toxic": 0.9373089075088501,
+         "severe_toxic": 0.0010259747505187988,
+         "obscene": 0.013565391302108765,
+         "insult": 0.03743860125541687,
+         "identity_hate": 0.006350785493850708,
+         "threat": 0.0046683549880981445
       }
    },
    { 
-      "id":1,
-      "scores":{ 
-         "identity_hate":0.019688785076141357,
-         "insult":0.026154309511184692,
-         "obscene":0.0172310471534729,
-         "severe_toxic":0.04065057635307312,
-         "threat":0.5432639718055725,
-         "toxic":0.9557554721832275
+      "id": 1,
+      "scores": {
+         "toxic": 0.0007597804069519043,
+         "severe_toxic": 0.000028789043426513672,
+         "obscene": 0.0001621246337890625,
+         "insult": 0.0001621842384338379,
+         "identity_hate": 0.00004634261131286621,
+         "threat": 0.0000368952751159668
       }
    }
 ]
@@ -127,7 +127,7 @@ curl -X POST http://localhost:8000/classifier -H "Content-Type: application/json
 ```
 You will get the response like the following:
 ```sh
-[{"id": 0, "scores": {"identity_hate": 0.007177263498306274, "insult": 0.5632272958755493, "obscene": 0.01373317837715149, "severe_toxic": 0.004234760999679565, "threat": 0.00850290060043335, "toxic": 0.9498064517974854}}, {"id": 1, "scores": {"identity_hate": 0.019688785076141357, "insult": 0.026154309511184692, "obscene": 0.0172310471534729, "severe_toxic": 0.04065057635307312, "threat": 0.5432639718055725, "toxic": 0.9557554721832275}}]
+[{"id": 0, "scores": {"toxic": 0.9373089075088501, "severe_toxic": 0.0010259747505187988, "obscene": 0.013565391302108765, "insult": 0.03743860125541687, "identity_hate": 0.006350785493850708, "threat": 0.0046683549880981445}}, {"id": 1, "scores": {"toxic": 0.0007597804069519043, "severe_toxic": 2.8789043426513672e-05, "obscene": 0.0001621246337890625, "insult": 0.0001621842384338379, "identity_hate": 4.634261131286621e-05, "threat": 3.68952751159668e-05}}]
 ```
 
 ### 7. Using a GPU
