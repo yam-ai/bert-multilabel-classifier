@@ -1,4 +1,3 @@
-#!/usr/bin/env bash
 # coding=utf-8
 # Copyright 2019 YAM AI Machinery Limited
 #
@@ -15,11 +14,12 @@
 # limitations under the License.
 #
 
-python run_classifier.py \
---do_train=true \
---do_eval=true \
---train_dir=$TRAIN_DIR \
---vocab_file=$BERT_DIR/vocab.txt \
---bert_config_file=$BERT_DIR/bert_config.json \
---init_checkpoint=$BERT_DIR/bert_model.ckpt \
---output_dir=$MODEL_DIR
+# Parameters for training
+train_db = 'train.db'
+do_lower_case = False
+train_eval_test_ratio = [7, 3, 0]
+max_seq_length = 512
+train_batch_size = 10
+eval_batch_size = 5
+learning_rate = 3e-5
+num_train_epochs = 4.0

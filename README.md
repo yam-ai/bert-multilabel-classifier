@@ -41,7 +41,7 @@ Download and extract pretrained models from [BERT](https://github.com/google-res
 
 
 ### 3. Tune the hyperparameters
-The training hyperparameters such as `train_batch_size`, `learning_rate`, `num_train_epochs`, `max_seq_length` can be modified in [`train.sh`](https://github.com/yam-ai/bert-multilabel-classifier/blob/master/train.sh).
+The training hyperparameters such as `num_train_epochs`, `learning_rate`, `max_seq_length`, `train_batch_size` can be modified in [`settings.py`](settings.py).
 
 
 ### 4. Train the model
@@ -52,12 +52,15 @@ docker build -f train.Dockerfile -t classifier-train .
 
 Run the training container by mounting the above volumes:
 ```sh
-docker run -v $BERT_DIR:/bert -v $DATA_SQLITE:/data.db -v $OUTPUT_DIR:/output classifier-train
+docker run -v $BERT_DIR:/bert -v $TRAIN_DIR:/train -v $MODEL_DIR:/model classifier-train
 ```
 
-* `$BERT_DIR` is the full path where the downloaded BERT pretrained model is unzipped to, e.g., `/downloads/multi_cased_L-12_H-768_A-12`.
-* `$DATA_SQLITE` is the full path to the loaded sqlite database, e.g. `/data/example/data.db`.
-* `$OUTPUT_DIR` is the full path of the output directory, e.g., `/data/example/output/`. After training, it will contain a bunch of files, including a directory with number (a timestamp) as its name. For example, the directory `$OUTPUT_DIR/1564483298/` stores the trained model to be used for serving.
+* `$BERT_DIR` is the full path where the downloaded BERT pretrained model is unzipped to, e.g., `/downloads/multi_cased_L-12_H-768_A-12/`.
+* `$TRAIN_DIR` is the full path of the input directory that contains the sqlite DB `train.db` storing the training set, e.g., `/data/example/train/`.
+* `$MODEL_DIR` is the full path of the output directory, e.g., `/data/example/model/`.
+After training, it will contain a bunch of files, including a directory with number (a timestamp) as its name. For example, the directory `$MODEL_DIR/1564483298/` stores the trained model to be used for serving.
+
+If you want to override the default settings with your modified settings, for example, in `/data/example/settings.py`, you can add the flag `-v /data/example/settings.py:/src/settings.py`.
 
 
 ### 5. Serve the model
@@ -68,7 +71,7 @@ docker build -f serve.Dockerfile -t classifier-serve .
 
 Run the serving container by mounting the output directory above and exposing the HTTP port:
 ```sh
-docker run -v $OUTPUT_DIR/1564483298/:/model -p 8000:8000 classifier-serve
+docker run -v $MODEL_DIR/1564483298/:/model -p 8000:8000 classifier-serve
 ```
 
 
@@ -133,11 +136,11 @@ If GPU is available, acceleration of training and serving can be acheived by run
 After building the docker image, run `docker` using the `nvidia` runtime:
 
 ```sh
-docker run --runtime nvida -v $BERT_DIR:/bert -v $DATA_SQLITE:/data.db -v $OUTPUT_DIR:/output classifier-train
+docker run --runtime nvidia -v $BERT_DIR:/bert -v $TRAIN_DIR:/train -v $MODEL_DIR:/model classifier-train
 ```
 or 
 ```sh
-docker run --runtime nvidia -v $OUTPUT_DIR/1564483298/:/model -p 8000:8000 classifier-serve
+docker run --runtime nvidia -v $MODEL_DIR/1564483298/:/model -p 8000:8000 classifier-serve
 ```
 
 If you are building the project from the source code directly (i.e., not using Docker), you also need to modify [`requirements.txt`](https://github.com/yam-ai/bert-multilabel-classifier/blob/master/requirements.txt) to use `tensorflow-gpu`.
