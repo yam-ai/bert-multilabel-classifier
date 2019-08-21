@@ -14,18 +14,13 @@
 # limitations under the License.
 #
 
-FROM tensorflow/tensorflow:1.14.0-py3
+FROM tensorflow/tensorflow:1.14.0-gpu-py3
 
-WORKDIR /source/
-COPY . /source/
+WORKDIR /src/
+COPY . /src/
 
-RUN pip install -U pip setuptools \
-    && pip install falcon gunicorn jsonschema
-
-ENV PORT=8000
+ENV BERT_DIR=/bert
+ENV TRAIN_DIR=/train
 ENV MODEL_DIR=/model
-RUN echo '#!/usr/bin/env bash' > /serve.sh \
-    && echo 'gunicorn -b 0.0.0.0:${PORT} "app:create_app(\"${MODEL_DIR}\")"' >> /serve.sh \
-    && chmod +x /serve.sh
 
-CMD ["/serve.sh"]
+CMD ["/src/train.sh"]
