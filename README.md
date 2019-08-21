@@ -87,7 +87,7 @@ Make an HTTP POST request to `http://localhost:8000/classifier` with a JSON body
       },
       { 
          "id":1,
-         "text":"The fear of death is the most unjustified of all fears, for there's no risk of accident for someone who's dead"
+         "text":"Put your hand on a hot stove for a minute, and it seems like an hour. Sit with a pretty girl for an hour, and it seems like a minute. That's relativity."
       }
    ]
 }
@@ -109,12 +109,12 @@ Then in reply you will get back a list of scores, indicating the likelihoods of 
    { 
       "id": 1,
       "scores": {
-         "toxic": 0.0007597804069519043,
-         "severe_toxic": 0.000028789043426513672,
-         "obscene": 0.0001621246337890625,
-         "insult": 0.0001621842384338379,
-         "identity_hate": 0.00004634261131286621,
-         "threat": 0.0000368952751159668
+         "toxic": 0.00045806169509887695,
+         "severe_toxic": 0.000041812658309936523,
+         "obscene": 0.0001443624496459961,
+         "insult": 0.00014069676399230957,
+         "identity_hate": 0.000054776668548583984,
+         "threat": 0.000050067901611328125
       }
    }
 ]
@@ -123,11 +123,11 @@ Then in reply you will get back a list of scores, indicating the likelihoods of 
 You can test the API using `curl` as follows:
 
 ```sh
-curl -X POST http://localhost:8000/classifier -H "Content-Type: application/json" -d $'{"texts":[{"id":0,"text":"Three great forces rule the world: stupidity, fear and greed."},{"id":1,"text":"The fear of death is the most unjustified of all fears, for there\'s no risk of accident for someone who\'s dead"}]}'
+curl -X POST http://localhost:8000/classifier -H "Content-Type: application/json" -d $'{"texts":[{"id":0,"text":"Three great forces rule the world: stupidity, fear and greed."},{"id":1,"text":"Put your hand on a hot stove for a minute, and it seems like an hour. Sit with a pretty girl for an hour, and it seems like a minute. That\'s relativity."}]}'
 ```
 You will get the response like the following:
 ```sh
-[{"id": 0, "scores": {"toxic": 0.9373089075088501, "severe_toxic": 0.0010259747505187988, "obscene": 0.013565391302108765, "insult": 0.03743860125541687, "identity_hate": 0.006350785493850708, "threat": 0.0046683549880981445}}, {"id": 1, "scores": {"toxic": 0.0007597804069519043, "severe_toxic": 2.8789043426513672e-05, "obscene": 0.0001621246337890625, "insult": 0.0001621842384338379, "identity_hate": 4.634261131286621e-05, "threat": 3.68952751159668e-05}}]
+[{"id": 0, "scores": {"toxic": 0.9373089075088501, "severe_toxic": 0.0010259747505187988, "obscene": 0.013565391302108765, "insult": 0.03743860125541687, "identity_hate": 0.006350785493850708, "threat": 0.0046683549880981445}}, {"id": 1, "scores": {"toxic": 0.00045806169509887695, "severe_toxic": 4.1812658309936523e-05, "obscene": 0.0001443624496459961, "insult": 0.00014069676399230957, "identity_hate": 5.4776668548583984e-05, "threat": 5.0067901611328125e-05}}]
 ```
 
 ### 7. Using a GPU
@@ -145,7 +145,32 @@ docker run --runtime nvidia -v $MODEL_DIR/1564483298/:/model -p 8000:8000 classi
 
 If you are building the project from the source code directly (i.e., not using Docker), you also need to modify [`requirements.txt`](https://github.com/yam-ai/bert-multilabel-classifier/blob/master/requirements.txt) to use `tensorflow-gpu`.
 
-### 8. Profesional services
+
+### 8. Pull docker images from Docker Hub
+We have published the docker images on the [Docker Hub](https://hub.docker.com/r/yamai/bert-multilabel-classifier). You can pull them directly from the Docker Hub as follows:
+```sh
+docker pull yamai/bert-multilabel-classifier:train-latest
+docker pull yamai/bert-multilabel-classifier:serve-latest
+```
+
+After these images are successfully pulled, you can run the training or serving container as follows:
+```sh
+docker run -v $TRAIN_DIR:/train -v $MODEL_DIR:/model yamai/bert-multilabel-classifier:train-latest
+```
+or
+```sh
+docker run -v $MODEL_DIR:/model -p 8000:8000 yamai/bert-multilabel-classifier:serve-latest
+```
+
+
+If GPU is available, you can pull and use the images with tags `gpu-train-latest` and `gpu-serve-latest` instead:
+```sh
+docker pull yamai/bert-multilabel-classifier:gpu-train-latest
+docker pull yamai/bert-multilabel-classifier:gpu-serve-latest
+```
+
+
+### 9. Profesional services
 
 If you need any consultancy and support services from [YAM AI Machinery](https://www.yam.ai), please find us at:
 * https://www.yam.ai
