@@ -39,7 +39,8 @@ request_schema = {
                     },
                     'text': {
                         'type': 'string',
-                        'description': 'A string of text'
+                        'description': 'A string of text',
+                        'minLength': 1
                     }
                 }
             }
