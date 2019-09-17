@@ -19,7 +19,7 @@ FROM tensorflow/tensorflow:1.14.0-gpu-py3
 WORKDIR /source/
 COPY . /source/
 
-RUN pip install -U pip setuptools \
+RUN pip install -U pip setuptools absl-py==0.8.0 \
     && pip install falcon gunicorn jsonschema
 
 ENV PORT=8000

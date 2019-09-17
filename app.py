@@ -17,6 +17,8 @@
 import falcon
 from wsgiref import simple_server
 from falcon.media.validators import jsonschema
+import logging
+import sys
 
 import serve
 
@@ -39,7 +41,8 @@ request_schema = {
                     },
                     'text': {
                         'type': 'string',
-                        'description': 'A string of text'
+                        'description': 'A string of text',
+                        'minLength': 1
                     }
                 }
             }
@@ -49,24 +52,48 @@ request_schema = {
 
 
 class ClassifierResource:
-    def __init__(self, classifier):
+    def __init__(self, logger, classifier):
+        self.logger = logger
         self.classifier = classifier
 
     @jsonschema.validate(request_schema)
     def on_post(self, req, resp):
         """Handles POST requests"""
         texts = req.media.get("texts")
-        result = self.classifier.predict(texts)
+        try:
+            result = self.classifier.predict(texts)
+        except Exception as e:
+            self.logger.error('Error occurred during prediction: {}'.format(e))
+            raise falcon.HTTPInternalServerError(
+                title='Internal server error',
+                description='The service was unavailable. Please try again later.')
 
         resp.media = result
 
 
 def create_app(model_dir):
-    classifier = serve.MultiLabelClassifierServer(model_dir)
+    ch = logging.StreamHandler()
+    ch.setFormatter(
+        logging.Formatter(
+            '[%(asctime)s] [%(process)d] [%(levelname)s] %(message)s',
+            '%Y-%m-%d %H:%M:%S %z')
+    )
+    logger = logging.getLogger(__name__)
+    logger.addHandler(ch)
+    logger.setLevel(logging.INFO)
 
-    app = falcon.API()
-    app.add_route('/classifier', ClassifierResource(classifier=classifier))
+    try:
+        classifier = serve.MultiLabelClassifierServer(model_dir)
+        app = falcon.API()
+        app.add_route(
+            '/classifier', ClassifierResource(logger=logger, classifier=classifier))
+    except Exception as e:
+        logger.error(
+            'Failed to initialize with model directory {}: {}'.format(model_dir, e))
+        sys.exit(4)  # tell gunicorn to exit
 
+    logger.info('Serving multilabel classifier...')
+    logger.info('Number of labels: {}'.format(classifier.num_labels))
     return app
 
 
