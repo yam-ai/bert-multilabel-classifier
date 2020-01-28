@@ -1,6 +1,6 @@
 setuptools>=41.0.0
 pip>=19.0.0
-tensorflow==1.14.0   # CPU Version of TensorFlow.
+tensorflow==1.15.2   # CPU Version of TensorFlow.
 # tensorflow-gpu==1.14.0  # GPU version of TensorFlow.
 falcon==2.0.0
 gunicorn==19.9.0
