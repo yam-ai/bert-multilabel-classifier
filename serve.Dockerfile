@@ -14,7 +14,7 @@
 # limitations under the License.
 #
 
-FROM tensorflow/tensorflow:1.14.0-py3
+FROM tensorflow/tensorflow:1.15.4-py3
 
 WORKDIR /source/
 COPY . /source/
