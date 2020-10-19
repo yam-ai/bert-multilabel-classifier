@@ -19,7 +19,7 @@ FROM tensorflow/tensorflow:1.15.4-py3
 WORKDIR /source/
 COPY . /source/
 
-RUN pip install -U pip setuptools absl-py==0.8.0 \
+RUN pip install -U pip setuptools absl-py \
     && pip install falcon gunicorn jsonschema
 
 ENV PORT=8000
